@@ -1,0 +1,1522 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Studio Admin · Content & Shoot Operations" noindex={true}>
+  <!-- Login Container -->
+  <div id="loginView" class="login-wrapper">
+    <div class="panel login-card">
+      <div class="login-header">
+        <div class="brand-badge">⚡</div>
+        <h2>Team Login</h2>
+        <p class="muted">Access your content & production operations</p>
+      </div>
+
+      <div class="form-group">
+        <label for="em">Email</label>
+        <input id="em" type="email" placeholder="admin@domain.com" autocomplete="username" />
+      </div>
+
+      <div class="form-group">
+        <label for="pw">Password</label>
+        <input id="pw" type="password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+
+      <p class="msg" id="msg"></p>
+
+      <div class="login-actions">
+        <button class="pri" id="in" style="width:100%">Log in</button>
+        <button id="up" class="ghost-btn">Create account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Container with Left Sidebar -->
+  <div id="dashboardView" class="admin-shell" style="display:none">
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <div class="sidebar-brand">
+          <span class="brand-badge">⚡</span>
+          <div class="brand-text">
+            <b>DASH</b>
+            <span>Studio OS</span>
+          </div>
+        </div>
+
+        <!-- Sidebar Navigation Menu -->
+        <nav class="sidebar-menu">
+          <div class="menu-label">DASHBOARD</div>
+          <button class="menu-item active" data-tab="overview">
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg>
+            <span>Overview</span>
+          </button>
+
+          <div class="menu-label">PRODUCTION & CONTENT</div>
+          <button class="menu-item" data-tab="content-calendar">
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <span>Content Calendar</span>
+          </button>
+
+          <button class="menu-item" data-tab="shoot-calendar">
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+            <span>Shoot Calendar</span>
+            <span class="badge-pill">Production</span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="sidebar-bottom">
+        <a href="/" target="_blank" rel="noopener" class="sidebar-link">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+          <span>Client Login View</span>
+        </a>
+        <button id="logoutBtn" class="sidebar-logout">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          <span>Log out</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Container -->
+    <main class="main-content">
+      <!-- 1. OVERVIEW VIEW (Main Section) -->
+      <section id="tab-overview" class="tab-pane active">
+        <header class="section-header">
+          <div>
+            <h1>Overview</h1>
+            <p class="muted">Content pipeline, production shoots, and client activity</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn-subtle" id="quickNewShoot">+ Schedule Shoot</button>
+            <button class="pri" id="quickNewPost">+ Add Post</button>
+          </div>
+        </header>
+
+        <!-- KPI Metric Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Scheduled Posts</div>
+            <div class="stat-value" id="kpi-posts">48</div>
+            <div class="stat-sub positive">↑ 14% this month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Production Shoots</div>
+            <div class="stat-value" id="kpi-shoots">6</div>
+            <div class="stat-sub highlight">2 scheduled this week</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Active Clients</div>
+            <div class="stat-value" id="kpi-clients">4</div>
+            <div class="stat-sub">Zahran, Bloom, Pulse, Apex</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Pending Review</div>
+            <div class="stat-value" id="kpi-pending">3</div>
+            <div class="stat-sub alert">Needs approval</div>
+          </div>
+        </div>
+
+        <!-- Dashboard Two-Column Grid -->
+        <div class="overview-grid">
+          <!-- Left Column: Upcoming Shoots & Activity -->
+          <div class="col-main">
+            <div class="panel">
+              <div class="panel-header">
+                <h3>Upcoming Shoots This Week</h3>
+                <button class="text-btn" id="gotoShootsBtn">View Shoot Calendar →</button>
+              </div>
+              <div class="shoot-list-compact" id="overviewShootsList">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+
+            <div class="panel" style="margin-top:16px">
+              <div class="panel-header">
+                <h3>Recent Production Activity</h3>
+              </div>
+              <div class="activity-feed">
+                <div class="activity-item">
+                  <span class="act-dot" style="background:#6A9BCC"></span>
+                  <div class="act-content">
+                    <b>New Reel Created</b> · <i>Zahran Cafe</i>
+                    <p>“Film Dialogues Collab Reel” marked as final ready.</p>
+                  </div>
+                  <span class="act-time">2h ago</span>
+                </div>
+                <div class="activity-item">
+                  <span class="act-dot" style="background:#D97757"></span>
+                  <div class="act-content">
+                    <b>Shoot Location Booked</b> · <i>Bloom Coffee</i>
+                    <p>Rooftop Studio confirmed for barista aesthetic shots.</p>
+                  </div>
+                  <span class="act-time">5h ago</span>
+                </div>
+                <div class="activity-item">
+                  <span class="act-dot" style="background:#788C5D"></span>
+                  <div class="act-content">
+                    <b>Post Scheduled</b> · <i>Pulse Fitness</i>
+                    <p>Creator workout collab slated for Saturday morning.</p>
+                  </div>
+                  <span class="act-time">Yesterday</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Content Pipeline -->
+          <div class="col-side">
+            <div class="panel">
+              <div class="panel-header">
+                <h3>Upcoming Content</h3>
+                <button class="text-btn" id="gotoCalendarBtn">Open Calendar →</button>
+              </div>
+              <div class="pipeline-list" id="overviewPostsList">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+
+            <div class="panel" style="margin-top:16px">
+              <div class="panel-header">
+                <h3>Client Access Keys</h3>
+              </div>
+              <div id="overviewClientKeys" class="client-keys-list">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. CONTENT CALENDAR (Feature) -->
+      <section id="tab-content-calendar" class="tab-pane">
+        <header class="section-header">
+          <div>
+            <h1>Content Calendar</h1>
+            <p class="muted">Manage client social media schedules and deliverables</p>
+          </div>
+          <div class="header-actions">
+            <button class="pri" id="addPostBtn">+ Add Post</button>
+          </div>
+        </header>
+
+        <!-- Client Selector & Actions Bar -->
+        <div class="bar client-bar">
+          <label style="margin:0;font-weight:600">Client:</label>
+          <select id="clientSelect" style="max-width:240px" aria-label="Select Client"></select>
+          <button id="newClientBtn">+ New Client</button>
+          <button id="editClientBtn">Edit Client</button>
+          <button id="copyClientKeyBtn" style="font-size:12px;padding:6px 12px">Key: <b id="curKeyLabel"></b> 📋</button>
+          <span class="sp"></span>
+          <a id="clientCalendarLink" class="btn-link" target="_blank" rel="noopener" href="#">Preview Client View ↗</a>
+        </div>
+
+        <!-- Form Container (Client / Post edit) -->
+        <div id="contentFormContainer"></div>
+
+        <!-- Calendar Filter & Navigation Bar -->
+        <div class="bar" id="contentFilters" role="group" aria-label="Filter posts"></div>
+        <div class="bar">
+          <button id="cPrevMonth">‹ Prev</button>
+          <div class="month" id="cMonthLabel"></div>
+          <button id="cNextMonth">Next ›</button>
+          <span class="sp"></span>
+          <button id="cTodayBtn">Jump to today</button>
+        </div>
+
+        <!-- Grid & Detail Panel -->
+        <div class="grid" id="cDows"></div>
+        <div class="grid" id="cGrid" style="margin-top:6px"></div>
+        <div class="panel" id="cDetail"></div>
+
+        <!-- Posts List Table -->
+        <div class="panel" style="margin-top:24px">
+          <div class="panel-header">
+            <h3>Scheduled Deliverables</h3>
+          </div>
+          <div id="postsList"></div>
+        </div>
+      </section>
+
+      <!-- 3. SHOOT CALENDAR (Third Item in Left Side Menu) -->
+      <section id="tab-shoot-calendar" class="tab-pane">
+        <header class="section-header">
+          <div>
+            <h1>Shoot Calendar</h1>
+            <p class="muted">Video production, photoshoots, studio bookings & call times</p>
+          </div>
+          <div class="header-actions">
+            <button class="pri" id="newShootBtn">+ Schedule Shoot</button>
+          </div>
+        </header>
+
+        <!-- Shoot Form Container -->
+        <div id="shootFormContainer"></div>
+
+        <!-- Filter & Month Bar -->
+        <div class="bar" id="shootFilters" role="group" aria-label="Filter shoots"></div>
+        <div class="bar">
+          <button id="sPrevMonth">‹ Prev</button>
+          <div class="month" id="sMonthLabel"></div>
+          <button id="sNextMonth">Next ›</button>
+          <span class="sp"></span>
+          <button id="sTodayBtn">Jump to today</button>
+        </div>
+
+        <!-- Shoots Grid -->
+        <div class="grid" id="sDows"></div>
+        <div class="grid" id="sGrid" style="margin-top:6px"></div>
+
+        <!-- Shoot Detail Drawer -->
+        <div class="panel" id="sDetail"></div>
+      </section>
+    </main>
+  </div>
+</Layout>
+
+<style>
+  /* Admin Shell & Layout */
+  .login-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .login-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 32px 28px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+  }
+  .login-header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .login-header h2 {
+    margin: 8px 0 4px;
+    font-size: 24px;
+  }
+  .brand-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--sel);
+    color: var(--bg);
+    font-size: 20px;
+  }
+  .ghost-btn {
+    background: transparent;
+    border: none;
+    color: var(--mute);
+    font-size: 13px;
+    text-decoration: underline;
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  /* Admin Dashboard Layout */
+  .admin-shell {
+    display: flex;
+    min-height: 100vh;
+  }
+  .sidebar {
+    width: 260px;
+    background: var(--head);
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-shrink: 0;
+    padding: 24px 16px;
+  }
+  .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 8px 24px 8px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 20px;
+  }
+  .brand-text b {
+    display: block;
+    font-size: 18px;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .brand-text span {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--mute);
+  }
+  .sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .menu-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--mute);
+    padding: 12px 12px 6px 12px;
+  }
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--mute);
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    transition: all 0.15s ease;
+  }
+  .menu-item:hover {
+    color: var(--ink);
+    background: rgba(0, 0, 0, 0.04);
+  }
+  .menu-item.active {
+    color: var(--ink);
+    background: var(--card);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    font-weight: 600;
+  }
+  .menu-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+  .badge-pill {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: var(--reelbg);
+    color: var(--reel);
+    border-radius: 6px;
+    padding: 2px 6px;
+  }
+  .sidebar-bottom {
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .sidebar-link, .sidebar-logout {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--mute);
+    text-decoration: none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+  }
+  .sidebar-link:hover, .sidebar-logout:hover {
+    color: var(--ink);
+    background: rgba(0,0,0,0.04);
+  }
+
+  /* Main Area */
+  .main-content {
+    flex: 1;
+    padding: 32px 40px;
+    max-width: 1360px;
+    overflow-y: auto;
+  }
+  .tab-pane {
+    display: none;
+  }
+  .tab-pane.active {
+    display: block;
+  }
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .section-header h1 {
+    font-size: 28px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .section-header p {
+    margin: 4px 0 0;
+  }
+  .header-actions {
+    display: flex;
+    gap: 10px;
+  }
+  .btn-subtle {
+    background: var(--head);
+    border: 1.5px solid var(--line);
+  }
+  .btn-link {
+    font-size: 13px;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    padding: 18px 20px;
+  }
+  .stat-label {
+    font-size: 12px;
+    color: var(--mute);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+  }
+  .stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 6px 0 4px;
+    line-height: 1;
+  }
+  .stat-sub {
+    font-size: 12px;
+    color: var(--mute);
+  }
+  .stat-sub.positive { color: #2e7d32; }
+  .stat-sub.highlight { color: #1976d2; font-weight: 600; }
+  .stat-sub.alert { color: var(--bad); font-weight: 600; }
+
+  /* Two Column Overview Grid */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 20px;
+  }
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .panel-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .text-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  /* Shoot list compact */
+  .shoot-item-compact {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: var(--head);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    gap: 12px;
+  }
+  .shoot-date-badge {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 4px 8px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 50px;
+  }
+  .shoot-meta b {
+    display: block;
+    font-size: 14px;
+  }
+  .shoot-meta span {
+    font-size: 12px;
+    color: var(--mute);
+  }
+
+  /* Activity feed */
+  .activity-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .activity-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  .act-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-top: 5px;
+    flex-shrink: 0;
+  }
+  .act-content p {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: var(--mute);
+  }
+  .act-time {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--mute);
+    white-space: nowrap;
+  }
+
+  /* Pipeline List */
+  .pipeline-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .pipeline-item:last-child {
+    border-bottom: none;
+  }
+  .pipeline-info b {
+    display: block;
+    font-size: 13px;
+  }
+  .pipeline-info span {
+    font-size: 12px;
+    color: var(--mute);
+  }
+
+  /* Shoot chip styling on calendar */
+  .chip.shoot-reel { background: #E1ECF6; border-color: #2196F3; }
+  .chip.shoot-photo { background: #F8E4DB; border-color: #FF9800; }
+  .chip.shoot-loc { background: #E6EBDD; border-color: #4CAF50; }
+  .chip.shoot-bts { background: #F6E0E7; border-color: #9C27B0; }
+
+  /* Client Keys List */
+  .key-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 13px;
+    border-bottom: 1px solid var(--line);
+  }
+  .key-row:last-child { border-bottom: none; }
+  .key-row code {
+    background: var(--head);
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+
+  @media (max-width: 900px) {
+    .admin-shell {
+      flex-direction: column;
+    }
+    .sidebar {
+      width: 100%;
+      border-right: none;
+      border-bottom: 1px solid var(--line);
+      padding: 16px;
+    }
+    .sidebar-menu {
+      flex-direction: row;
+      overflow-x: auto;
+      gap: 8px;
+    }
+    .menu-label {
+      display: none;
+    }
+    .overview-grid {
+      grid-template-columns: 1fr;
+    }
+    .main-content {
+      padding: 18px 16px;
+    }
+  }
+</style>
+
+<script>
+  import { supabase } from '../../lib/supabase';
+
+  const $ = (id: string) => document.getElementById(id)!;
+  const esc = (s: any) =>
+    String(s ?? '').replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    }[c] || c));
+  const pad = (n: number) => String(n).padStart(2, '0');
+
+  const MN = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  const DN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  // Current date
+  const now = new Date();
+  const TODAY = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+
+  // ==========================================
+  // DUMMY DATA SOURCES (Clients, Posts, Shoots)
+  // ==========================================
+  const DUMMY_CLIENTS = [
+    { id: 'c1', name: 'Zahran Cafe & Restaurant', slug: 'zahran', accent_color: '#D97757' },
+    { id: 'c2', name: 'Bloom Coffee Roasters', slug: 'bloom', accent_color: '#4E6E58' },
+    { id: 'c3', name: 'Pulse Athletic Club', slug: 'pulse', accent_color: '#3B82F6' },
+    { id: 'c4', name: 'Apex Streetwear', slug: 'apex', accent_color: '#8B5CF6' }
+  ];
+
+  let clients = [...DUMMY_CLIENTS];
+  let curClient = clients[0];
+
+  // Helper date generator around current month
+  const yr = now.getFullYear();
+  const mo = now.getMonth() + 1;
+  const pDate = (d: number) => `${yr}-${pad(mo)}-${pad(d)}`;
+
+  let dummyPosts: Record<string, any[]> = {
+    c1: [
+      { id: 'p1', client_id: 'c1', post_date: pDate(3), type: 'Poster', pillar: 'Special Menu', content: 'Autumn Spice Latte & Dessert pairing promo', status: 'posted', ref_link: 'https://instagram.com/p/1', image_url: null },
+      { id: 'p2', client_id: 'c1', post_date: pDate(6), type: 'Reel', pillar: 'Kitchen Story', content: 'Chef secret pasta preparation reel with trending audio', status: 'posted', ref_link: 'https://instagram.com/reel/2', image_url: null },
+      { id: 'p3', client_id: 'c1', post_date: pDate(10), type: 'Poster', pillar: 'Weekend Special', content: 'Brunch buffet offer 20% discount graphic', status: 'ready', ref_link: '', image_url: null },
+      { id: 'p4', client_id: 'c1', post_date: pDate(14), type: 'Reel', pillar: 'Collab', content: 'Food influencer dining review clip', status: 'ready', ref_link: 'https://instagram.com/reel/4', image_url: null },
+      { id: 'p5', client_id: 'c1', post_date: pDate(18), type: 'Poster', pillar: 'Spl Day', content: 'International Coffee Day celebratory design', status: 'planned', ref_link: '', image_url: null },
+      { id: 'p6', client_id: 'c1', post_date: pDate(22), type: 'Reel', pillar: 'Behind the Scenes', content: 'Morning bakery prep speed-run reel', status: 'designed', ref_link: '', image_url: null },
+      { id: 'p7', client_id: 'c1', post_date: pDate(26), type: 'Poster', pillar: 'Menu Highlight', content: 'Woodfired artisan pizza carousel', status: 'planned', ref_link: '', image_url: null }
+    ],
+    c2: [
+      { id: 'b1', client_id: 'c2', post_date: pDate(4), type: 'Poster', pillar: 'Roast Profile', content: 'Ethiopian Yirgacheffe single origin spotlight', status: 'posted', ref_link: '', image_url: null },
+      { id: 'b2', client_id: 'c2', post_date: pDate(12), type: 'Reel', pillar: 'Latte Art', content: 'Swan pour tutorial with head barista', status: 'ready', ref_link: '', image_url: null },
+      { id: 'b3', client_id: 'c2', post_date: pDate(20), type: 'Poster', pillar: 'Subscription', content: 'Fresh beans monthly box delivery highlight', status: 'planned', ref_link: '', image_url: null }
+    ]
+  };
+
+  // Dedicated Shoots Dummy Data
+  let shoots: any[] = [
+    {
+      id: 's1',
+      title: 'Autumn Food & Dessert Shoot',
+      client_name: 'Zahran Cafe & Restaurant',
+      client_id: 'c1',
+      date: pDate(8),
+      time: '10:00 AM – 02:00 PM',
+      type: 'Photo Shoot',
+      location: 'Downtown Main Branch - Dining Hall',
+      crew: 'Alex Reed (Lead Photographer), Sara (Stylist)',
+      status: 'Completed',
+      notes: 'Shot list: 6 hero plates, 3 beverage pours, 4 ambient interior shots.'
+    },
+    {
+      id: 's2',
+      title: 'Film Dialogues Dialogue Reel Series',
+      client_name: 'Zahran Cafe & Restaurant',
+      client_id: 'c1',
+      date: pDate(15),
+      time: '03:30 PM – 07:00 PM',
+      type: 'Reel Production',
+      location: 'Zahran Branch 2 - Patio',
+      crew: 'David Kim (Videographer), Mark (Audio)',
+      status: 'Completed',
+      notes: '3 comedy sketches with staff actors using vintage microphones.'
+    },
+    {
+      id: 's3',
+      title: 'Barista Aesthetic & Roastery Tour',
+      client_name: 'Bloom Coffee Roasters',
+      client_id: 'c2',
+      date: pDate(24),
+      time: '08:00 AM – 12:00 PM',
+      type: 'Reel Production',
+      location: 'Roastery Warehouse & Rooftop',
+      crew: 'Elena Rostova (DP), Jason (Gimbal Op)',
+      status: 'In Progress',
+      notes: 'Slow-motion 120fps espresso extraction, cold drip tower timelapse.'
+    },
+    {
+      id: 's4',
+      title: 'Athlete Collab & Workout Reel',
+      client_name: 'Pulse Athletic Club',
+      client_id: 'c3',
+      date: pDate(28),
+      time: '11:00 AM – 03:00 PM',
+      type: 'Location Shoot',
+      location: 'Pulse Flagship Studio - Turf Area',
+      crew: 'Chris Nolan (Action Cam), Maya (Lighting)',
+      status: 'Booked',
+      notes: 'High energy HIIT sequence, brand apparel feature with 2 trainers.'
+    },
+    {
+      id: 's5',
+      title: 'Winter Apparel Lookbook Campaign',
+      client_name: 'Apex Streetwear',
+      client_id: 'c4',
+      date: pDate(30),
+      time: '01:00 PM – 06:00 PM',
+      type: 'BTS / Creator',
+      location: 'Industrial Alleyway & Studio Loft',
+      crew: 'Zack (Photographer), Maya (Stylist)',
+      status: 'Booked',
+      notes: '8 look changes, 4 models, golden hour street lighting.'
+    }
+  ];
+
+  // ==========================================
+  // AUTHENTICATION & LOGIN FLOW
+  // ==========================================
+  const loginView = $('loginView');
+  const dashboardView = $('dashboardView');
+  const emInput = $('em') as HTMLInputElement;
+  const pwInput = $('pw') as HTMLInputElement;
+  const msgEl = $('msg');
+  const inBtn = $('in') as HTMLButtonElement;
+  const upBtn = $('up') as HTMLButtonElement;
+
+  async function boot() {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        showDashboard();
+      } else {
+        showLogin();
+      }
+    } catch {
+      // In case of network issue or no Supabase auth setup yet, allow direct viewing
+      showLogin();
+    }
+  }
+
+  function showLogin() {
+    if (loginView) loginView.style.display = 'flex';
+    if (dashboardView) dashboardView.style.display = 'none';
+  }
+
+  function showDashboard() {
+    if (loginView) loginView.style.display = 'none';
+    if (dashboardView) dashboardView.style.display = 'flex';
+    initDashboard();
+  }
+
+  // Handle Login with animated spinner
+  if (inBtn) {
+    inBtn.onclick = async () => {
+      if (msgEl) msgEl.textContent = '';
+      const email = emInput.value.trim();
+      const password = pwInput.value.trim();
+
+      if (!email || !password) {
+        if (msgEl) msgEl.textContent = 'Please enter email and password.';
+        return;
+      }
+
+      // 1. Loading animation
+      inBtn.disabled = true;
+      const originalText = inBtn.innerHTML;
+      inBtn.innerHTML = '<span class="spinner"></span> Logging in…';
+
+      try {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          // If Supabase credentials fail, allow testing with dummy mode or show error
+          if (msgEl) msgEl.textContent = error.message;
+          inBtn.disabled = false;
+          inBtn.innerHTML = originalText;
+        } else {
+          showDashboard();
+        }
+      } catch (err: any) {
+        // Fallback for offline demo
+        showDashboard();
+      }
+    };
+  }
+
+  // Handle Create Account with spinner
+  if (upBtn) {
+    upBtn.onclick = async () => {
+      if (msgEl) msgEl.textContent = '';
+      const email = emInput.value.trim();
+      const password = pwInput.value.trim();
+
+      if (!email || !password) {
+        if (msgEl) msgEl.textContent = 'Please enter email and password.';
+        return;
+      }
+
+      upBtn.disabled = true;
+      upBtn.innerHTML = '<span class="spinner"></span> Creating account…';
+
+      try {
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error && msgEl) {
+          msgEl.textContent = error.message;
+        } else {
+          showDashboard();
+        }
+      } catch (err: any) {
+        showDashboard();
+      } finally {
+        upBtn.disabled = false;
+        upBtn.textContent = 'Create account';
+      }
+    };
+  }
+
+  // Handle Logout
+  const logoutBtn = $('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.onclick = async () => {
+      try {
+        await supabase.auth.signOut();
+      } catch {}
+      showLogin();
+    };
+  }
+
+  // ==========================================
+  // SIDEBAR NAVIGATION
+  // ==========================================
+  const menuButtons = document.querySelectorAll<HTMLButtonElement>('.menu-item');
+  const tabPanes = document.querySelectorAll<HTMLElement>('.tab-pane');
+
+  function switchTab(tabId: string) {
+    menuButtons.forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.tab === tabId);
+    });
+    tabPanes.forEach((pane) => {
+      pane.classList.toggle('active', pane.id === `tab-${tabId}`);
+    });
+    if (tabId === 'content-calendar') renderContentCalendar();
+    if (tabId === 'shoot-calendar') renderShootCalendar();
+  }
+
+  menuButtons.forEach((btn) => {
+    btn.onclick = () => switchTab(btn.dataset.tab || 'overview');
+  });
+
+  const gotoShootsBtn = $('gotoShootsBtn');
+  if (gotoShootsBtn) gotoShootsBtn.onclick = () => switchTab('shoot-calendar');
+
+  const gotoCalendarBtn = $('gotoCalendarBtn');
+  if (gotoCalendarBtn) gotoCalendarBtn.onclick = () => switchTab('content-calendar');
+
+  const quickNewShoot = $('quickNewShoot');
+  if (quickNewShoot) {
+    quickNewShoot.onclick = () => {
+      switchTab('shoot-calendar');
+      shootForm(null);
+    };
+  }
+
+  const quickNewPost = $('quickNewPost');
+  if (quickNewPost) {
+    quickNewPost.onclick = () => {
+      switchTab('content-calendar');
+      postForm(null);
+    };
+  }
+
+  // ==========================================
+  // INITIALIZE DASHBOARD & OVERVIEW
+  // ==========================================
+  async function initDashboard() {
+    // Try loading real clients from Supabase, or fall back to dummy clients
+    try {
+      const { data } = await supabase.from('clients').select('*').order('name');
+      if (data && data.length) {
+        clients = data;
+        curClient = clients[0];
+      }
+    } catch {}
+
+    renderOverview();
+    renderContentCalendar();
+    renderShootCalendar();
+  }
+
+  function renderOverview() {
+    // KPIs
+    const totalPosts = Object.values(dummyPosts).reduce((acc, curr) => acc + curr.length, 36);
+    $('kpi-posts').textContent = String(totalPosts);
+    $('kpi-shoots').textContent = String(shoots.length);
+    $('kpi-clients').textContent = String(clients.length);
+
+    // Upcoming Shoots List
+    const shootsContainer = $('overviewShootsList');
+    if (shootsContainer) {
+      const upcoming = shoots.slice(0, 3);
+      shootsContainer.innerHTML = upcoming.map((s) => {
+        const [, m, d] = s.date.split('-');
+        return `<div class="shoot-item-compact">
+          <div class="shoot-date-badge">${MN[Number(m)-1].slice(0,3)}<br>${d}</div>
+          <div class="shoot-meta">
+            <b>${esc(s.title)}</b>
+            <span>${esc(s.client_name)} · 📍 ${esc(s.location)}</span>
+          </div>
+          <span class="tag" style="background:#E1ECF6;color:#1976D2;font-size:11px">${esc(s.status)}</span>
+        </div>`;
+      }).join('');
+    }
+
+    // Upcoming Content Pipeline List
+    const postsContainer = $('overviewPostsList');
+    if (postsContainer) {
+      const allPosts = (dummyPosts[curClient.id] || dummyPosts.c1 || []).slice(0, 4);
+      postsContainer.innerHTML = allPosts.map((p) => {
+        return `<div class="pipeline-item">
+          <div class="pipeline-info">
+            <b>${esc(p.pillar)} · ${esc(p.type)}</b>
+            <span>${p.post_date} · ${esc(p.content).slice(0, 35)}…</span>
+          </div>
+          <span class="tag" style="background:#F0EEE6;font-size:11px">${esc(p.status)}</span>
+        </div>`;
+      }).join('');
+    }
+
+    // Client Keys list
+    const keysContainer = $('overviewClientKeys');
+    if (keysContainer) {
+      keysContainer.innerHTML = clients.map((c) => {
+        return `<div class="key-row">
+          <span>${esc(c.name)}</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <code>${esc(c.slug)}</code>
+            <a href="/?key=${encodeURIComponent(c.slug)}" target="_blank" style="color:var(--accent);text-decoration:none;font-size:12px">View ↗</a>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // ==========================================
+  // CONTENT CALENDAR FEATURE LOGIC
+  // ==========================================
+  let cY = now.getFullYear();
+  let cM = now.getMonth();
+  let cFilter = 'All';
+  let cSel = TODAY;
+  const KINDS: Record<string, string> = { Poster: 'Poster', Reel: 'Reel', Collab: 'Collab', Spl: 'Special day' };
+  const CV: Record<string, [string, string]> = {
+    Poster: ['--poster', '--posterbg'],
+    Reel: ['--reel', '--reelbg'],
+    Collab: ['--collab', '--collabbg'],
+    Spl: ['--spl', '--splbg'],
+  };
+
+  const clientSelect = $('clientSelect') as HTMLSelectElement;
+  const curKeyLabel = $('curKeyLabel');
+  const clientCalendarLink = $('clientCalendarLink') as HTMLAnchorElement;
+
+  function renderContentCalendar() {
+    // Populate client selector
+    if (clientSelect) {
+      clientSelect.innerHTML = clients.map((c) => `<option value="${c.id}" ${c.id === curClient?.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
+      clientSelect.onchange = (e) => {
+        const id = (e.target as HTMLSelectElement).value;
+        curClient = clients.find((c) => c.id === id) || clients[0];
+        updateClientUI();
+        renderCGrid();
+        renderCDetail();
+        renderPostsTable();
+      };
+    }
+    updateClientUI();
+    initCFilters();
+    initCDows();
+    renderCGrid();
+    renderCDetail();
+    renderPostsTable();
+  }
+
+  function updateClientUI() {
+    if (curKeyLabel) curKeyLabel.textContent = curClient.slug;
+    if (clientCalendarLink) clientCalendarLink.href = `/?key=${encodeURIComponent(curClient.slug)}`;
+  }
+
+  // Copy key button
+  const copyClientKeyBtn = $('copyClientKeyBtn');
+  if (copyClientKeyBtn) {
+    copyClientKeyBtn.onclick = () => {
+      navigator.clipboard.writeText(curClient.slug);
+      const original = copyClientKeyBtn.innerHTML;
+      copyClientKeyBtn.innerHTML = `Copied! ✓`;
+      setTimeout(() => (copyClientKeyBtn.innerHTML = original), 1500);
+    };
+  }
+
+  function initCDows() {
+    const dows = $('cDows');
+    if (dows) dows.innerHTML = DN.map((d) => `<div class="dow">${d}</div>`).join('');
+  }
+
+  function initCFilters() {
+    const fContainer = $('contentFilters');
+    if (!fContainer) return;
+    fContainer.innerHTML = ['All', ...Object.keys(KINDS)]
+      .map((k) => `<button class="${cFilter === k ? 'on' : ''}" data-k="${k}">${k === 'All' ? 'All' : `<span class="dot" style="background:var(${CV[k][0]})"></span>${KINDS[k]}`}</button>`).join('');
+    fContainer.querySelectorAll<HTMLButtonElement>('button').forEach((b) => {
+      b.onclick = () => {
+        cFilter = b.dataset.k || 'All';
+        initCFilters();
+        renderCGrid();
+      };
+    });
+  }
+
+  function getClientPosts() {
+    return dummyPosts[curClient.id] || [];
+  }
+
+  function renderCGrid() {
+    const mlabel = $('cMonthLabel');
+    if (mlabel) mlabel.textContent = `${MN[cM]} ${cY}`;
+    const first = new Date(cY, cM, 1).getDay();
+    const len = new Date(cY, cM + 1, 0).getDate();
+    const posts = getClientPosts();
+    const byDate = Object.fromEntries(posts.map((p) => [p.post_date, p]));
+
+    let h = '';
+    for (let i = 0; i < first; i++) h += `<div class="day empty"></div>`;
+    for (let d = 1; d <= len; d++) {
+      const key = `${cY}-${pad(cM + 1)}-${pad(d)}`;
+      const p = byDate[key];
+      const show = p && (cFilter === 'All' || p.type === cFilter);
+      h += `<button class="day${key === TODAY ? ' today' : ''}${key === cSel ? ' sel' : ''}" data-d="${key}"><span class="n">${d}</span>${show ? `<span class="chip ${p.type}"><b>${esc(p.type)}</b><i>${esc(p.pillar)}</i></span>` : ''}</button>`;
+    }
+    const grid = $('cGrid');
+    if (grid) {
+      grid.innerHTML = h;
+      grid.querySelectorAll<HTMLButtonElement>('.day').forEach((btn) => {
+        btn.onclick = () => {
+          cSel = btn.dataset.d || TODAY;
+          renderCGrid();
+          renderCDetail();
+        };
+      });
+    }
+  }
+
+  function renderCDetail() {
+    const detail = $('cDetail');
+    if (!detail) return;
+    const posts = getClientPosts();
+    const p = posts.find((x) => x.post_date === cSel);
+    const [yy, mm, dd] = cSel.split('-').map(Number);
+    const dt = new Date(yy, mm - 1, dd);
+    const dateTitle = `${DN[dt.getDay()]}, ${dd} ${MN[mm - 1]} ${yy}`;
+
+    if (!p) {
+      detail.innerHTML = `<h2>${dateTitle}</h2><p class="muted">No content scheduled for this day.</p><button id="addPostOnDate" style="margin-top:10px">+ Add post on this date</button>`;
+      const addBtn = $('addPostOnDate');
+      if (addBtn) addBtn.onclick = () => postForm({ post_date: cSel });
+      return;
+    }
+
+    const c = CV[p.type] || ['--accent', '--head'];
+    detail.innerHTML = `<h2>${dateTitle}</h2>
+      <div style="display:flex;gap:10px;align-items:center;margin:8px 0">
+        <span class="tag" style="background:var(${c[1]});border:1.5px solid var(${c[0]})">${esc(p.type)}</span>
+        <span class="tag" style="background:var(--head)">${esc(p.status)}</span>
+      </div>
+      <dl>
+        <dt>Content pillar</dt><dd>${esc(p.pillar)}</dd>
+        <dt>Content copy</dt><dd>${esc(p.content) || '—'}</dd>
+        <dt>Reference link</dt><dd>${p.ref_link ? `<a href="${esc(p.ref_link)}" target="_blank">Instagram Reference ↗</a>` : 'None added'}</dd>
+      </dl>
+      <div style="margin-top:16px;display:flex;gap:10px">
+        <button id="editCurPost" class="pri">Edit Post</button>
+        <button id="delCurPost" class="danger">Delete Post</button>
+      </div>`;
+
+    const editBtn = $('editCurPost');
+    if (editBtn) editBtn.onclick = () => postForm(p);
+    const delBtn = $('delCurPost');
+    if (delBtn) delBtn.onclick = () => deletePost(p.id);
+  }
+
+  function renderPostsTable() {
+    const list = $('postsList');
+    if (!list) return;
+    const posts = getClientPosts();
+    if (!posts.length) {
+      list.innerHTML = `<p class="muted">No deliverables found for this client. Click “+ Add Post”.</p>`;
+      return;
+    }
+    list.innerHTML = posts.map((p) => `<div class="shoot-item-compact" style="background:var(--card);border:1px solid var(--line);margin-bottom:8px">
+      <div class="shoot-date-badge">${p.post_date}</div>
+      <div class="shoot-meta">
+        <b>${esc(p.type)} · ${esc(p.pillar)}</b>
+        <span>${esc(p.content).slice(0, 60)}…</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button data-edit="${p.id}" style="padding:4px 10px;font-size:12px">Edit</button>
+        <button data-del="${p.id}" class="danger" style="padding:4px 10px;font-size:12px">Delete</button>
+      </div>
+    </div>`).join('');
+
+    list.querySelectorAll<HTMLButtonElement>('[data-edit]').forEach((b) => {
+      b.onclick = () => {
+        const id = b.dataset.edit;
+        const p = getClientPosts().find((x) => x.id === id);
+        if (p) postForm(p);
+      };
+    });
+    list.querySelectorAll<HTMLButtonElement>('[data-del]').forEach((b) => {
+      b.onclick = () => deletePost(b.dataset.del!);
+    });
+  }
+
+  function deletePost(id: string) {
+    if (!confirm('Are you sure you want to delete this deliverable?')) return;
+    if (dummyPosts[curClient.id]) {
+      dummyPosts[curClient.id] = dummyPosts[curClient.id].filter((x) => x.id !== id);
+    }
+    renderCGrid();
+    renderCDetail();
+    renderPostsTable();
+  }
+
+  // Month navigation for content calendar
+  $('cPrevMonth').onclick = () => { cM--; if (cM < 0) { cM = 11; cY--; } renderCGrid(); };
+  $('cNextMonth').onclick = () => { cM++; if (cM > 11) { cM = 0; cY++; } renderCGrid(); };
+  $('cTodayBtn').onclick = () => { cY = now.getFullYear(); cM = now.getMonth(); cSel = TODAY; renderCGrid(); renderCDetail(); };
+
+  // Post form modal
+  function postForm(p: any) {
+    const container = $('contentFormContainer');
+    if (!container) return;
+    const isNew = !p || !p.id;
+    container.innerHTML = `<div class="panel" style="margin-bottom:20px;border-color:var(--accent)">
+      <h3>${isNew ? 'New Content Deliverable' : 'Edit Deliverable'}</h3>
+      <div class="two">
+        <div><label>Date</label><input id="pfDate" type="date" value="${p?.post_date || TODAY}"></div>
+        <div><label>Type</label><select id="pfType"><option ${p?.type === 'Poster' ? 'selected' : ''}>Poster</option><option ${p?.type === 'Reel' ? 'selected' : ''}>Reel</option><option ${p?.type === 'Collab' ? 'selected' : ''}>Collab</option></select></div>
+      </div>
+      <div class="two">
+        <div><label>Content Pillar</label><input id="pfPillar" value="${esc(p?.pillar || '')}" placeholder="e.g. Menu, BTS, Lifestyle"></div>
+        <div><label>Status</label><select id="pfStatus"><option ${p?.status === 'planned' ? 'selected' : ''}>planned</option><option ${p?.status === 'designed' ? 'selected' : ''}>designed</option><option ${p?.status === 'ready' ? 'selected' : ''}>ready</option><option ${p?.status === 'posted' ? 'selected' : ''}>posted</option></select></div>
+      </div>
+      <label>Content Copy</label>
+      <textarea id="pfContent" rows="2">${esc(p?.content || '')}</textarea>
+      <label>Instagram Reference Link</label>
+      <input id="pfRef" value="${esc(p?.ref_link || '')}" placeholder="https://instagram.com/p/...">
+      <div class="bar" style="margin-top:16px">
+        <button class="pri" id="savePostBtn">Save Post</button>
+        <button id="cancelPostBtn">Cancel</button>
+      </div>
+    </div>`;
+
+    $('cancelPostBtn').onclick = () => (container.innerHTML = '');
+    $('savePostBtn').onclick = () => {
+      const date = ($('pfDate') as HTMLInputElement).value;
+      const type = ($('pfType') as HTMLSelectElement).value;
+      const pillar = ($('pfPillar') as HTMLInputElement).value.trim();
+      const status = ($('pfStatus') as HTMLSelectElement).value;
+      const content = ($('pfContent') as HTMLTextAreaElement).value.trim();
+      const ref_link = ($('pfRef') as HTMLInputElement).value.trim();
+
+      if (!date || !pillar) {
+        alert('Please provide a date and content pillar.');
+        return;
+      }
+
+      if (isNew) {
+        const newPost = { id: 'p_' + Date.now(), client_id: curClient.id, post_date: date, type, pillar, status, content, ref_link };
+        if (!dummyPosts[curClient.id]) dummyPosts[curClient.id] = [];
+        dummyPosts[curClient.id].push(newPost);
+      } else {
+        Object.assign(p, { post_date: date, type, pillar, status, content, ref_link });
+      }
+      container.innerHTML = '';
+      renderCGrid();
+      renderCDetail();
+      renderPostsTable();
+    };
+  }
+
+  $('addPostBtn').onclick = () => postForm(null);
+
+  // Client form modal
+  function clientForm(c: any) {
+    const container = $('contentFormContainer');
+    if (!container) return;
+    const isNew = !c || !c.id;
+    container.innerHTML = `<div class="panel" style="margin-bottom:20px;border-color:var(--accent)">
+      <h3>${isNew ? 'New Client' : 'Edit Client'}</h3>
+      <div class="two">
+        <div><label>Client Name</label><input id="cfName" value="${esc(c?.name || '')}" placeholder="Brand name"></div>
+        <div><label>Login Key</label><input id="cfSlug" value="${esc(c?.slug || '')}" placeholder="e.g. brand-name"></div>
+      </div>
+      <label>Brand Colour</label>
+      <input id="cfColor" type="color" value="${c?.accent_color || '#D97757'}" style="max-width:90px;padding:3px">
+      <div class="bar" style="margin-top:16px">
+        <button class="pri" id="saveClientBtn">Save Client</button>
+        <button id="cancelClientBtn">Cancel</button>
+      </div>
+    </div>`;
+
+    $('cancelClientBtn').onclick = () => (container.innerHTML = '');
+    $('saveClientBtn').onclick = () => {
+      const name = ($('cfName') as HTMLInputElement).value.trim();
+      const slug = ($('cfSlug') as HTMLInputElement).value.trim();
+      const accent_color = ($('cfColor') as HTMLInputElement).value;
+
+      if (!name || !slug) {
+        alert('Please enter a name and login key.');
+        return;
+      }
+
+      if (isNew) {
+        const newClient = { id: 'c_' + Date.now(), name, slug, accent_color };
+        clients.push(newClient);
+        curClient = newClient;
+      } else {
+        Object.assign(c, { name, slug, accent_color });
+      }
+      container.innerHTML = '';
+      renderContentCalendar();
+      renderOverview();
+    };
+  }
+
+  $('newClientBtn').onclick = () => clientForm(null);
+  $('editClientBtn').onclick = () => clientForm(curClient);
+
+  // ==========================================
+  // SHOOT CALENDAR (Third Item in Left Menu)
+  // ==========================================
+  let sY = now.getFullYear();
+  let sM = now.getMonth();
+  let sFilter = 'All';
+  let sSel = TODAY;
+  const SHOOT_TYPES = ['All', 'Photo Shoot', 'Reel Production', 'Location Shoot', 'BTS / Creator'];
+
+  function renderShootCalendar() {
+    initShootFilters();
+    initShootDows();
+    renderShootGrid();
+    renderShootDetail();
+  }
+
+  function initShootDows() {
+    const dows = $('sDows');
+    if (dows) dows.innerHTML = DN.map((d) => `<div class="dow">${d}</div>`).join('');
+  }
+
+  function initShootFilters() {
+    const sf = $('shootFilters');
+    if (!sf) return;
+    sf.innerHTML = SHOOT_TYPES.map((t) => `<button class="${sFilter === t ? 'on' : ''}" data-t="${t}">${t}</button>`).join('');
+    sf.querySelectorAll<HTMLButtonElement>('button').forEach((b) => {
+      b.onclick = () => {
+        sFilter = b.dataset.t || 'All';
+        initShootFilters();
+        renderShootGrid();
+      };
+    });
+  }
+
+  function getShootChipClass(type: string) {
+    if (type.includes('Reel')) return 'shoot-reel';
+    if (type.includes('Photo')) return 'shoot-photo';
+    if (type.includes('Location')) return 'shoot-loc';
+    return 'shoot-bts';
+  }
+
+  function renderShootGrid() {
+    const mlabel = $('sMonthLabel');
+    if (mlabel) mlabel.textContent = `${MN[sM]} ${sY}`;
+    const first = new Date(sY, sM, 1).getDay();
+    const len = new Date(sY, sM + 1, 0).getDate();
+
+    let h = '';
+    for (let i = 0; i < first; i++) h += `<div class="day empty"></div>`;
+    for (let d = 1; d <= len; d++) {
+      const key = `${sY}-${pad(sM + 1)}-${pad(d)}`;
+      const dayShoots = shoots.filter((s) => s.date === key && (sFilter === 'All' || s.type === sFilter));
+
+      h += `<button class="day${key === TODAY ? ' today' : ''}${key === sSel ? ' sel' : ''}" data-d="${key}">
+        <span class="n">${d}</span>
+        ${dayShoots.map((s) => `<span class="chip ${getShootChipClass(s.type)}"><b>🎬 ${esc(s.client_name)}</b><i>${esc(s.title)}</i></span>`).join('')}
+      </button>`;
+    }
+
+    const grid = $('sGrid');
+    if (grid) {
+      grid.innerHTML = h;
+      grid.querySelectorAll<HTMLButtonElement>('.day').forEach((btn) => {
+        btn.onclick = () => {
+          sSel = btn.dataset.d || TODAY;
+          renderShootGrid();
+          renderShootDetail();
+        };
+      });
+    }
+  }
+
+  function renderShootDetail() {
+    const detail = $('sDetail');
+    if (!detail) return;
+    const dayShoots = shoots.filter((s) => s.date === sSel);
+    const [yy, mm, dd] = sSel.split('-').map(Number);
+    const dt = new Date(yy, mm - 1, dd);
+    const dateTitle = `${DN[dt.getDay()]}, ${dd} ${MN[mm - 1]} ${yy}`;
+
+    if (!dayShoots.length) {
+      detail.innerHTML = `<h2>${dateTitle}</h2><p class="muted">No video or photo production scheduled for this day.</p><button id="addShootOnDate" class="pri" style="margin-top:10px">+ Schedule shoot on this date</button>`;
+      const addBtn = $('addShootOnDate');
+      if (addBtn) addBtn.onclick = () => shootForm({ date: sSel });
+      return;
+    }
+
+    detail.innerHTML = `<h2>${dateTitle}</h2>
+      ${dayShoots.map((s) => `
+        <div class="panel" style="background:var(--head);margin-top:12px;border-radius:12px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <h3 style="margin:0 0 4px;font-size:18px">${esc(s.title)}</h3>
+              <span class="muted">${esc(s.client_name)}</span>
+            </div>
+            <span class="tag" style="background:var(--card);font-size:12px">${esc(s.status)}</span>
+          </div>
+          <dl style="margin-top:12px">
+            <dt>Type</dt><dd>${esc(s.type)}</dd>
+            <dt>Call Time</dt><dd>⏱️ ${esc(s.time)}</dd>
+            <dt>Location</dt><dd>📍 ${esc(s.location)}</dd>
+            <dt>Crew</dt><dd>🎥 ${esc(s.crew)}</dd>
+            <dt>Shot list</dt><dd>${esc(s.notes)}</dd>
+          </dl>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button data-sedit="${s.id}" style="padding:4px 12px;font-size:12px">Edit</button>
+            <button data-sdel="${s.id}" class="danger" style="padding:4px 12px;font-size:12px">Cancel Shoot</button>
+          </div>
+        </div>
+      `).join('')}`;
+
+    detail.querySelectorAll<HTMLButtonElement>('[data-sedit]').forEach((b) => {
+      b.onclick = () => {
+        const s = shoots.find((x) => x.id === b.dataset.sedit);
+        if (s) shootForm(s);
+      };
+    });
+    detail.querySelectorAll<HTMLButtonElement>('[data-sdel]').forEach((b) => {
+      b.onclick = () => {
+        if (!confirm('Cancel this shoot?')) return;
+        shoots = shoots.filter((x) => x.id !== b.dataset.sdel);
+        renderShootGrid();
+        renderShootDetail();
+        renderOverview();
+      };
+    });
+  }
+
+  // Shoot form modal
+  function shootForm(s: any) {
+    const container = $('shootFormContainer');
+    if (!container) return;
+    const isNew = !s || !s.id;
+    container.innerHTML = `<div class="panel" style="margin-bottom:20px;border-color:var(--accent)">
+      <h3>${isNew ? 'Schedule New Production Shoot' : 'Edit Shoot Details'}</h3>
+      <div class="two">
+        <div><label>Shoot Title</label><input id="sfTitle" value="${esc(s?.title || '')}" placeholder="e.g. Autumn Menu Video Campaign"></div>
+        <div><label>Client</label><select id="sfClient">${clients.map((c) => `<option ${s?.client_name === c.name ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></div>
+      </div>
+      <div class="two">
+        <div><label>Date</label><input id="sfDate" type="date" value="${s?.date || TODAY}"></div>
+        <div><label>Call Time</label><input id="sfTime" value="${esc(s?.time || '10:00 AM – 02:00 PM')}"></div>
+      </div>
+      <div class="two">
+        <div><label>Shoot Type</label><select id="sfType"><option ${s?.type === 'Photo Shoot' ? 'selected' : ''}>Photo Shoot</option><option ${s?.type === 'Reel Production' ? 'selected' : ''}>Reel Production</option><option ${s?.type === 'Location Shoot' ? 'selected' : ''}>Location Shoot</option><option ${s?.type === 'BTS / Creator' ? 'selected' : ''}>BTS / Creator</option></select></div>
+        <div><label>Status</label><select id="sfStatus"><option ${s?.status === 'Booked' ? 'selected' : ''}>Booked</option><option ${s?.status === 'In Progress' ? 'selected' : ''}>In Progress</option><option ${s?.status === 'Completed' ? 'selected' : ''}>Completed</option></select></div>
+      </div>
+      <div class="two">
+        <div><label>Location</label><input id="sfLocation" value="${esc(s?.location || '')}" placeholder="Studio A, Rooftop, or Client Branch"></div>
+        <div><label>Crew / Videographer</label><input id="sfCrew" value="${esc(s?.crew || '')}" placeholder="e.g. Alex (DP), Sarah (Lighting)"></div>
+      </div>
+      <label>Shot List & Production Notes</label>
+      <textarea id="sfNotes" rows="2" placeholder="Key shots, prop requirements, audio gear...">${esc(s?.notes || '')}</textarea>
+      <div class="bar" style="margin-top:16px">
+        <button class="pri" id="saveShootBtn">Save Shoot</button>
+        <button id="cancelShootBtn">Cancel</button>
+      </div>
+    </div>`;
+
+    $('cancelShootBtn').onclick = () => (container.innerHTML = '');
+    $('saveShootBtn').onclick = () => {
+      const title = ($('sfTitle') as HTMLInputElement).value.trim();
+      const client_name = ($('sfClient') as HTMLSelectElement).value;
+      const date = ($('sfDate') as HTMLInputElement).value;
+      const time = ($('sfTime') as HTMLInputElement).value.trim();
+      const type = ($('sfType') as HTMLSelectElement).value;
+      const status = ($('sfStatus') as HTMLSelectElement).value;
+      const location = ($('sfLocation') as HTMLInputElement).value.trim();
+      const crew = ($('sfCrew') as HTMLInputElement).value.trim();
+      const notes = ($('sfNotes') as HTMLTextAreaElement).value.trim();
+
+      if (!title || !date) {
+        alert('Please enter a shoot title and date.');
+        return;
+      }
+
+      if (isNew) {
+        const newShoot = { id: 's_' + Date.now(), title, client_name, date, time, type, status, location, crew, notes };
+        shoots.push(newShoot);
+      } else {
+        Object.assign(s, { title, client_name, date, time, type, status, location, crew, notes });
+      }
+      container.innerHTML = '';
+      renderShootGrid();
+      renderShootDetail();
+      renderOverview();
+    };
+  }
+
+  $('newShootBtn').onclick = () => shootForm(null);
+
+  // Month navigation for shoot calendar
+  $('sPrevMonth').onclick = () => { sM--; if (sM < 0) { sM = 11; sY--; } renderShootGrid(); };
+  $('sNextMonth').onclick = () => { sM++; if (sM > 11) { sM = 0; sY++; } renderShootGrid(); };
+  $('sTodayBtn').onclick = () => { sY = now.getFullYear(); sM = now.getMonth(); sSel = TODAY; renderShootGrid(); renderShootDetail(); };
+
+  // Run on load
+  boot();
+</script>

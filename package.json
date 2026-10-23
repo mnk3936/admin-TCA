@@ -1,0 +1,24 @@
+{
+  "name": "zahran-calendar",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Instagram content calendar",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mnk3936/zahran-calendar.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
+    "astro": "^7.4.2"
+  }
+}

@@ -1,0 +1,331 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Content Calendar">
+  <div class="wrap">
+    <!-- Client Login Screen -->
+    <div class="panel login" id="loginPanel" style="max-width:380px;margin:60px auto;display:none;">
+      <h2>Client Calendar</h2>
+      <p class="muted">Enter your client login key to view your content calendar</p>
+      <label for="clientKeyInput">Login Key</label>
+      <input id="clientKeyInput" type="text" placeholder="e.g. zahran" autocomplete="off" />
+      <p class="msg" id="loginMsg"></p>
+      <div class="bar">
+        <button class="pri" id="submitKeyBtn">View Calendar</button>
+      </div>
+    </div>
+
+    <!-- Calendar View -->
+    <div id="calendarView" style="display:none;">
+      <header>
+        <div>
+          <h1 id="title">Loading…</h1>
+          <p id="sub">Instagram content calendar</p>
+        </div>
+        <div class="stats" id="stats"></div>
+      </header>
+
+      <div class="bar" style="margin:12px 0 6px">
+        <span class="muted" id="clientBadge" style="font-size:13px"></span>
+        <span class="sp"></span>
+        <button id="switchKeyBtn" style="font-size:12px;padding:5px 12px">Switch Key</button>
+      </div>
+
+      <div class="bar" id="filters" role="group" aria-label="Filter by content type"></div>
+
+      <div class="bar">
+        <button id="prev" aria-label="Previous month">‹ Prev</button>
+        <div class="month" id="mlabel"></div>
+        <button id="next" aria-label="Next month">Next ›</button>
+        <span class="sp"></span>
+        <button id="todayBtn">Jump to today</button>
+      </div>
+
+      <div class="grid" id="dows"></div>
+      <div class="grid" id="grid" style="margin-top:6px"></div>
+      <div class="panel" id="detail"></div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import { supabase } from '../lib/supabase';
+
+  // If accessed from admin subdomain, redirect to /admin/
+  if (window.location.hostname.startsWith('admin.')) {
+    window.location.replace('/admin/');
+  }
+
+  const $ = (id: string) => document.getElementById(id)!;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const esc = (s: any) =>
+    String(s ?? '').replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    }[c] || c));
+
+  const MN = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  const DN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const KINDS: Record<string, string> = {
+    Poster: 'Poster',
+    Reel: 'Reel',
+    Collab: 'Collab',
+    Spl: 'Special day',
+  };
+  const CV: Record<string, [string, string]> = {
+    Poster: ['--poster', '--posterbg'],
+    Reel: ['--reel', '--reelbg'],
+    Collab: ['--collab', '--collabbg'],
+    Spl: ['--spl', '--splbg'],
+  };
+
+  const now = new Date();
+  const TODAY = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  let y = now.getFullYear();
+  let m = now.getMonth();
+  let filter = 'All';
+  let sel = TODAY;
+  let by: Record<string, any> = {};
+  let D: any[] = [];
+  let currentKey = '';
+
+  const loginPanel = $('loginPanel');
+  const calendarView = $('calendarView');
+  const clientKeyInput = $('clientKeyInput') as HTMLInputElement;
+  const loginMsg = $('loginMsg');
+  const submitKeyBtn = $('submitKeyBtn');
+  const switchKeyBtn = $('switchKeyBtn');
+  const clientBadge = $('clientBadge');
+
+  const dowsEl = $('dows');
+  if (dowsEl) {
+    dowsEl.innerHTML = DN.map((d) => `<div class="dow">${d}</div>`).join('');
+  }
+
+  function showLogin(msg = '') {
+    if (calendarView) calendarView.style.display = 'none';
+    if (loginPanel) loginPanel.style.display = 'block';
+    if (loginMsg) loginMsg.textContent = msg;
+    if (clientKeyInput) {
+      clientKeyInput.value = '';
+      clientKeyInput.focus();
+    }
+  }
+
+  async function loadCalendar(key: string) {
+    if (!key) {
+      showLogin();
+      return;
+    }
+    if (loginMsg) loginMsg.textContent = 'Verifying key…';
+
+    const { data, error } = await supabase.rpc('get_calendar', { p_slug: key.trim().toLowerCase() });
+    if (error || !data) {
+      localStorage.removeItem('client_login_key');
+      showLogin('Invalid login key. Please check and try again.');
+      return;
+    }
+
+    currentKey = key.trim().toLowerCase();
+    localStorage.setItem('client_login_key', currentKey);
+
+    // Update query param in address bar cleanly without page reload
+    const url = new URL(window.location.href);
+    url.searchParams.set('key', currentKey);
+    window.history.replaceState({}, '', url.toString());
+
+    if (loginPanel) loginPanel.style.display = 'none';
+    if (calendarView) calendarView.style.display = 'block';
+
+    document.title = data.client.name + ' · Content Calendar';
+    $('title').textContent = data.client.name;
+    if (clientBadge) {
+      clientBadge.textContent = `Client: ${data.client.name} (Key: ${currentKey})`;
+    }
+    if (data.client.accent_color) {
+      document.documentElement.style.setProperty('--accent', data.client.accent_color);
+    }
+
+    D = (data.posts || []).map((p: any) => ({ ...p, k: kind(p) }));
+    by = Object.fromEntries(D.map((p) => [p.date, p]));
+    if (D.length && !by[TODAY]) {
+      const f = D.find((p) => p.date >= TODAY) || D[D.length - 1];
+      if (f && f.date) {
+        [y, m] = [+f.date.slice(0, 4), +f.date.slice(5, 7) - 1];
+      }
+    }
+    stats();
+    filters();
+    grid();
+    detail();
+  }
+
+  const kind = (p: any) =>
+    p.pillar === 'Spl Day' ? 'Spl' : p.pillar === 'Collab' ? 'Collab' : p.type;
+  const ok = (p: any) => p.status === 'ready' || p.status === 'posted';
+
+  function stats() {
+    const c = (k: string) => D.filter((x) => x.type === k).length;
+    $('stats').innerHTML = `<div><b>${D.length}</b>planned</div><div><b>${c('Poster')}</b>posters</div><div><b>${c('Reel')}</b>reels</div><div><b>${D.filter(ok).length}</b>ready</div>`;
+  }
+
+  function filters() {
+    $('filters').innerHTML = ['All', ...Object.keys(KINDS)]
+      .map(
+        (k) =>
+          `<button class="${filter === k ? 'on' : ''}" data-k="${k}">${
+            k === 'All'
+              ? 'All'
+              : `<span class="dot" style="background:var(${CV[k][0]})"></span>${KINDS[k]}`
+          }</button>`
+      )
+      .join('');
+    $('filters').querySelectorAll('button').forEach(
+      (b) =>
+        (b.onclick = () => {
+          filter = b.dataset.k || 'All';
+          filters();
+          grid();
+        })
+    );
+  }
+
+  function grid() {
+    $('mlabel').textContent = MN[m] + ' ' + y;
+    const first = new Date(y, m, 1).getDay();
+    const len = new Date(y, m + 1, 0).getDate();
+    let h = '';
+    for (let i = 0; i < first; i++) h += `<div class="day empty"></div>`;
+    for (let d = 1; d <= len; d++) {
+      const key = `${y}-${pad(m + 1)}-${pad(d)}`;
+      const e = by[key];
+      const show = e && (filter === 'All' || e.k === filter);
+      h += `<button class="day${key === TODAY ? ' today' : ''}${key === sel ? ' sel' : ''}" data-d="${key}" aria-label="${d} ${MN[m]}${e ? ': ' + esc(e.type) + ', ' + esc(e.pillar) : ''}"><span class="n">${d}</span>${show ? `<span class="chip ${e.k}"><b>${esc(e.type)}${ok(e) ? ' ✓' : ''}</b><i>${esc(e.pillar)}</i></span>` : ''}</button>`;
+    }
+    $('grid').innerHTML = h;
+    $('grid').querySelectorAll<HTMLButtonElement>('button.day').forEach(
+      (b) =>
+        (b.onclick = () => {
+          sel = b.dataset.d || TODAY;
+          grid();
+          detail();
+        })
+    );
+  }
+
+  function detail() {
+    const [yy, mm, dd] = sel.split('-').map(Number);
+    const dt = new Date(yy, mm - 1, dd);
+    const e = by[sel];
+    const t = `${DN[dt.getDay()]}, ${dd} ${MN[mm - 1]} ${yy}`;
+    if (!e) {
+      $('detail').innerHTML = `<h2>${t}</h2><p class="muted">Nothing is scheduled for this day.</p>`;
+      return;
+    }
+    const c = CV[e.k];
+    const st: Record<string, string> = {
+      planned: 'Planned',
+      designed: 'Designed',
+      ready: '✓ Final post ready',
+      posted: '✓ Posted',
+    };
+    const statusText = st[e.status] || e.status;
+    const link = /^https?:\/\//.test(e.ref_link || '')
+      ? `<a href="${esc(e.ref_link)}" target="_blank" rel="noopener">View Instagram reference</a>`
+      : 'None added';
+    $('detail').innerHTML = `<h2>${t}</h2><span class="tag" style="background:var(${c[1]});border:1.5px solid var(${c[0]})">${esc(e.type)}</span><dl><dt>Content pillar</dt><dd>${esc(e.pillar)}</dd><dt>Content</dt><dd>${esc(e.content) || '—'}</dd><dt>Reference</dt><dd>${link}</dd><dt>Status</dt><dd>${statusText}</dd></dl>${e.image_url ? `<img src="${esc(e.image_url)}" alt="Final post">` : ''}`;
+  }
+
+  const prevBtn = $('prev');
+  if (prevBtn) {
+    prevBtn.onclick = () => {
+      m--;
+      if (m < 0) {
+        m = 11;
+        y--;
+      }
+      grid();
+    };
+  }
+
+  const nextBtn = $('next');
+  if (nextBtn) {
+    nextBtn.onclick = () => {
+      m++;
+      if (m > 11) {
+        m = 0;
+        y++;
+      }
+      grid();
+    };
+  }
+
+  const todayBtn = $('todayBtn');
+  if (todayBtn) {
+    todayBtn.onclick = () => {
+      y = now.getFullYear();
+      m = now.getMonth();
+      sel = TODAY;
+      grid();
+      detail();
+    };
+  }
+
+  // Key submission handler
+  const handleKeySubmit = async () => {
+    const key = clientKeyInput?.value.trim();
+    if (!key) {
+      if (loginMsg) loginMsg.textContent = 'Please enter your login key.';
+      return;
+    }
+    if (submitKeyBtn) {
+      (submitKeyBtn as HTMLButtonElement).disabled = true;
+      submitKeyBtn.innerHTML = '<span class="spinner"></span> Loading…';
+    }
+    await loadCalendar(key);
+    if (submitKeyBtn) {
+      (submitKeyBtn as HTMLButtonElement).disabled = false;
+      submitKeyBtn.textContent = 'View Calendar';
+    }
+  };
+
+  if (submitKeyBtn) submitKeyBtn.onclick = handleKeySubmit;
+  if (clientKeyInput) {
+    clientKeyInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleKeySubmit();
+    });
+  }
+
+  // Switch / Log out key
+  if (switchKeyBtn) {
+    switchKeyBtn.onclick = () => {
+      localStorage.removeItem('client_login_key');
+      const url = new URL(window.location.href);
+      url.searchParams.delete('key');
+      url.searchParams.delete('client');
+      window.history.replaceState({}, '', url.pathname);
+      showLogin();
+    };
+  }
+
+  // Boot check: URL param > localStorage
+  const urlParamKey =
+    new URLSearchParams(window.location.search).get('key') ||
+    new URLSearchParams(window.location.search).get('client');
+  const storedKey = localStorage.getItem('client_login_key');
+
+  if (urlParamKey) {
+    loadCalendar(urlParamKey);
+  } else if (storedKey) {
+    loadCalendar(storedKey);
+  } else {
+    showLogin();
+  }
+</script>
