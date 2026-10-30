@@ -1,4 +1,21 @@
 {
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "admin.thynkculture.com" }],
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/((?!assets/|admin/).*)",
+      "has": [{ "type": "host", "value": "admin.thynkculture.com" }],
+      "destination": "/admin/$1"
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "client.thynkculture.com" }],
+      "destination": "/index.html"
+    }
+  ],
   "headers": [
     { "source": "/admin/(.*)", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] }
   ]

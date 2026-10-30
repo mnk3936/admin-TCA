@@ -1,64 +1,2679 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex"><title>Admin · Content Calendar</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- Google Material Symbols Outlined -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 <link rel="stylesheet" href="/assets/style.css">
-<style>.row{display:grid;grid-template-columns:110px 1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.row:last-child{border:0}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.login{max-width:380px;margin:60px auto}@media(max-width:640px){.row{grid-template-columns:1fr auto}.row .d{grid-column:1/-1}.two{grid-template-columns:1fr}}</style>
+<style>
+/* Lock Viewport & Prevent Layout Shift */
+html {
+  overflow-y: scroll;
+}
+.wrap {
+  width: 100%;
+  max-width: 1100px;
+  min-width: 320px;
+  margin: 0 auto;
+  padding: 16px;
+  box-sizing: border-box;
+}
+#contentArea, .panel, .canvas-card, .client-subnav-bar {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Material Symbols Outlined */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 18px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  vertical-align: -3px;
+}
+
+button:not(.day), a.fab-item, .view-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.row{display:grid;grid-template-columns:110px 1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border:0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.login{max-width:380px;margin:60px auto}
+
+/* Loading Spinner */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.35);border-top-color:currentColor;border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:-2px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Dashboard Styles */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:16px 0}
+.kpi{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:16px 18px}
+.kpi b{display:block;font-size:26px;font-weight:700;line-height:1.1;margin-top:6px}
+.kpi span{font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+
+.client-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:14px}
+.client-card{background:var(--head);border:1.5px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:border-color .15s ease,transform .15s ease}
+.client-card:hover{border-color:var(--sel);transform:translateY(-2px)}
+.client-card-head{display:flex;align-items:center;justify-content:space-between}
+.client-title{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:600}
+
+/* Client Square Logo Avatar (Instagram-style) */
+.client-logo-avatar{width:38px;height:38px;border-radius:10px;object-fit:cover;border:1.5px solid var(--line);flex-shrink:0;background:var(--card)}
+.client-logo-placeholder{width:38px;height:38px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;flex-shrink:0}
+
+.color-dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0}
+.client-stats{display:flex;gap:14px;font-size:12px;background:var(--card);border:1px solid var(--line);padding:8px 12px;border-radius:8px;margin-top:4px}
+.client-stats b{font-weight:700;color:var(--ink)}
+
+/* Header Menu Dropdown */
+.header-dropdown{position:absolute;top:calc(100% + 8px);right:0;z-index:1000;background:var(--card);border:1.5px solid var(--line);border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,0.18);width:260px;padding:8px;display:none;flex-direction:column;gap:2px}
+.header-dropdown.open{display:flex}
+.fab-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;border:0;background:transparent;color:var(--ink);font-size:13.5px;cursor:pointer;text-align:left;width:100%;text-decoration:none;transition:background-color .18s ease;box-shadow:none !important}
+.fab-item:hover{background:color-mix(in srgb,var(--head) 75%,white);box-shadow:none !important}
+.fab-item.danger{color:var(--bad)}
+.fab-divider{height:1px;background:var(--line);margin:5px 0}
+
+/* Pinned Client Subnav Bar - Explicit Light Mode (Only Sub Navbar) */
+.client-subnav-bar{position:-webkit-sticky;position:sticky;top:10px;z-index:90;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0 16px;background:#ffffff !important;color:#141413 !important;border:1.5px solid #E8E6DC !important;border-radius:14px;padding:8px 12px;box-shadow:none !important}
+.client-subnav-bar .view-toggle{background:#F0EEE6 !important;border:1px solid #E8E6DC !important;padding:3px;border-radius:999px;display:inline-flex;gap:2px;flex-wrap:wrap}
+.client-subnav-bar .view-btn{border:0 !important;background:transparent !important;color:#55544E !important;padding:6px 12px;border-radius:999px;font-size:13px;font-weight:500;cursor:pointer;transition:background-color .18s ease,color .18s ease;box-shadow:none !important;display:inline-flex;align-items:center;gap:5px}
+.client-subnav-bar .view-btn .material-symbols-outlined{color:inherit !important;font-size:17px}
+.client-subnav-bar .view-btn:hover:not(.on){background-color:#ffffff !important;color:#141413 !important;box-shadow:none !important}
+.client-subnav-bar .view-btn.on{background:#141413 !important;color:#ffffff !important}
+.client-subnav-bar .view-btn.on:hover{background-color:#2b2b29 !important;color:#ffffff !important;box-shadow:none !important}
+.client-subnav-bar #subnavAddPost{background:#141413 !important;color:#ffffff !important;border:1.5px solid #141413 !important;box-shadow:none !important}
+.client-subnav-bar #subnavAddPost:hover{background-color:#2e2e2c !important;border-color:#2e2e2c !important;color:#ffffff !important;box-shadow:none !important}
+
+/* Mobile & Touch Responsive Optimization */
+@media(max-width:640px){
+  header{padding:14px 16px;gap:10px}
+  .client-subnav-bar{
+    top:6px;
+    padding:6px 8px;
+    gap:8px;
+    flex-wrap:nowrap;
+    align-items:center;
+  }
+  .client-subnav-bar .view-toggle{
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    max-width:calc(100% - 94px);
+  }
+  .client-subnav-bar .view-toggle::-webkit-scrollbar{display:none}
+  .client-subnav-bar .view-btn{
+    white-space:nowrap;
+    flex-shrink:0;
+    padding:5px 10px;
+    font-size:12px;
+  }
+  .client-subnav-bar #subnavAddPost{
+    white-space:nowrap;
+    flex-shrink:0;
+    padding:5px 10px;
+    font-size:12px;
+  }
+  .client-switcher-wrap{width:100%}
+  .client-switcher-btn{width:100%;max-width:100%;justify-content:space-between}
+  .switcher-btn-name{max-width:none;flex:1}
+  .client-switcher-popover{width:100%;max-width:100%;left:0;right:0}
+  .row{grid-template-columns:1fr;gap:6px;padding:10px 0}
+  .row .d{grid-column:auto}
+  .row > div:last-child{justify-content:flex-start !important;margin-top:4px}
+  .two{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .kpi{padding:12px 14px}
+  .kpi b{font-size:20px}
+  .kpi span{font-size:10.5px}
+  .client-cards{grid-template-columns:1fr}
+}
+
+/* Button Hover Animation - Subtle Lighten (No Shadow) */
+button:not(.day), a.fab-item, .view-btn, .tick-btn{transition:background-color .18s ease,border-color .18s ease,color .18s ease;box-shadow:none !important}
+button:not(.day):hover:not(:disabled){background-color:color-mix(in srgb,var(--card) 85%,white);border-color:color-mix(in srgb,var(--line) 75%,white);box-shadow:none !important}
+button.on:hover:not(:disabled),button.pri:hover:not(:disabled){background-color:color-mix(in srgb,var(--sel) 84%,white);border-color:color-mix(in srgb,var(--sel) 84%,white);color:var(--bg);box-shadow:none !important}
+button.danger:hover:not(:disabled){background-color:color-mix(in srgb,var(--bad) 8%,var(--card));border-color:color-mix(in srgb,var(--bad) 75%,white);color:color-mix(in srgb,var(--bad) 85%,white);box-shadow:none !important}
+
+/* Tick Button for Posted Verification */
+.tick-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:5px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);color:var(--mute);cursor:pointer;transition:background-color .18s ease,border-color .18s ease,color .18s ease;user-select:none;box-shadow:none !important}
+.tick-btn:hover{background-color:color-mix(in srgb,var(--card) 85%,white);border-color:#2E7D32;color:#2E7D32;box-shadow:none !important}
+.tick-btn.ticked{background:#E8F5E9;border-color:#2E7D32;color:#1B5E20;font-weight:600}
+.tick-btn.ticked:hover{background:#F1F8F1;box-shadow:none !important}
+@media(prefers-color-scheme:dark){.tick-btn.ticked{background:#1B3820;border-color:#4CAF50;color:#A5D6A7}.tick-btn.ticked:hover{background:#234729;box-shadow:none !important}}
+
+/* View Toggle (List vs Calendar vs Feed vs Canvas) */
+.view-toggle{display:inline-flex;background:var(--head);padding:3px;border-radius:999px;border:1px solid var(--line);gap:2px;flex-wrap:wrap}
+.view-btn{border:0;background:transparent;padding:6px 14px;border-radius:999px;font-size:13px;cursor:pointer;transition:background-color .18s ease,color .18s ease;box-shadow:none !important}
+.view-btn:hover:not(.on){background-color:color-mix(in srgb,var(--head) 65%,white);color:var(--ink);box-shadow:none !important}
+.view-btn.on{background:var(--sel);color:var(--bg)}
+.view-btn.on:hover{background-color:color-mix(in srgb,var(--sel) 84%,white);color:var(--bg);box-shadow:none !important}
+
+/* Modal Popups (Edit Client, New Client, Add Post, Confirmations) */
+.modal-backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.48);backdrop-filter:blur(3px);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeIn .15s ease-out}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-box{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:22px 24px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 16px 40px rgba(0,0,0,0.22);animation:scaleIn .15s ease-out}
+@keyframes scaleIn{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.modal-close-btn{background:transparent;border:0;cursor:pointer;padding:4px;border-radius:50%;color:var(--mute);display:flex;align-items:center;justify-content:center}
+.modal-close-btn:hover{background:var(--head);color:var(--ink)}
+.modal-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.modal-header h3{margin:0;font-size:19px;font-weight:600}
+.modal-icon-warn{color:var(--bad);font-size:26px}
+.modal-body{font-size:14px;color:var(--ink);line-height:1.5;margin:0 0 16px}
+.modal-actions{display:flex;align-items:center;gap:10px;margin-top:16px}
+
+/* Canvas Styles (White Theme with Dark Font) */
+.canvas-card{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:16px}
+.canvas-pill{display:inline-flex;align-items:center;gap:6px;background:var(--head);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:13px}
+.canvas-pill button{border:0;background:transparent;cursor:pointer;color:var(--mute);padding:0;font-size:14px;display:flex}
+.canvas-pill button:hover{color:var(--bad)}
+.doc-link{display:flex;align-items:center;justify-content:space-between;background:var(--head);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:8px}
+.doc-link a{color:var(--ink);text-decoration:none;font-weight:500;display:inline-flex;align-items:center;gap:6px}
+.doc-link a:hover{color:var(--accent)}
+
+/* White Document Theme for Content Strategy Canvas */
+.white-canvas-doc {
+  background: #ffffff !important;
+  color: #141413 !important;
+  border: 1px solid #e2e0d8 !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  border-radius: 12px;
+  padding: 24px 28px;
+  line-height: 1.65;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+.white-canvas-doc h1, .white-canvas-doc h2, .white-canvas-doc h3, .white-canvas-doc h4 {
+  color: #111111 !important;
+}
+.white-canvas-doc blockquote {
+  background: #f7f6f2 !important;
+  color: #3b3b3a !important;
+  border-left: 4px solid var(--accent, #D97757) !important;
+  padding: 10px 14px;
+  margin: 10px 0;
+  border-radius: 0 8px 8px 0;
+}
+.white-canvas-doc a {
+  color: var(--accent, #D97757) !important;
+}
+.white-canvas-input {
+  background: #ffffff !important;
+  color: #141413 !important;
+  border: 1px solid #d4d2c9 !important;
+  border-radius: 10px;
+  padding: 16px;
+  font-family: 'DM Sans', monospace, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Instagram 3-Column Feed View */
+.insta-feed-wrap {
+  max-width: 520px;
+  margin: 0 auto;
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  border-radius: 18px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+.insta-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+.insta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+.insta-cell {
+  aspect-ratio: 1 / 1;
+  position: relative;
+  background: #1c1c1e;
+  color: #ffffff;
+  overflow: hidden;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 8px;
+  user-select: none;
+}
+.insta-cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0; left: 0;
+}
+.insta-cell-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.72);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  padding: 8px;
+  z-index: 3;
+}
+.insta-cell:hover .insta-cell-overlay {
+  opacity: 1;
+}
+.insta-type-icon {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  color: #fff;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.8));
+  z-index: 2;
+}
+.insta-posted-icon {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  color: #4CAF50;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.8));
+  z-index: 2;
+}
+
+/* Option 1: Modern Interactive Workspace Switcher (Linear/Vercel style) */
+.client-switcher-wrap{position:relative;display:inline-flex}
+.client-switcher-btn{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13.5px;font-weight:600;cursor:pointer;color:var(--ink);text-align:left;user-select:none;transition:background-color .18s ease,border-color .18s ease;box-shadow:none !important;max-width:280px}
+.client-switcher-btn:hover{background-color:color-mix(in srgb,var(--card) 85%,white);border-color:color-mix(in srgb,var(--line) 75%,white);box-shadow:none !important}
+.switcher-btn-logo{width:20px;height:20px;border-radius:6px;object-fit:cover;flex-shrink:0}
+.switcher-btn-dot{width:20px;height:20px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;flex-shrink:0}
+.switcher-btn-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;font-weight:600}
+.switcher-chevron{font-size:16px;color:var(--mute);flex-shrink:0;margin-left:-2px}
+.switcher-kbd{font-size:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-weight:700;color:var(--mute);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:1px 5px;margin-left:2px;line-height:1.4;flex-shrink:0}
+.client-switcher-popover{position:absolute;top:calc(100% + 8px);left:0;z-index:1000;width:340px;max-width:calc(100vw - 32px);background:var(--card);border:1.5px solid var(--line);border-radius:14px;box-shadow:0 16px 36px rgba(0,0,0,0.18);display:none;flex-direction:column;overflow:hidden}
+.client-switcher-popover.open{display:flex}
+.switcher-search-box{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--card)}
+.switcher-search-input{flex:1;border:0 !important;outline:none !important;background:transparent !important;color:var(--ink);font-size:13.5px;padding:0 !important;box-shadow:none !important}
+.switcher-search-clear{border:0 !important;background:transparent !important;padding:2px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;box-shadow:none !important}
+.switcher-search-clear:hover{background:color-mix(in srgb,var(--head) 75%,white) !important}
+.switcher-body{max-height:320px;overflow-y:auto;padding:6px;display:flex;flex-direction:column;gap:2px}
+.switcher-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mute);padding:6px 8px 3px;display:flex;align-items:center;justify-content:space-between}
+.switcher-recent-row{display:flex;gap:6px;overflow-x:auto;padding:4px 6px 8px;scrollbar-width:none}
+.switcher-recent-row::-webkit-scrollbar{display:none}
+.switcher-recent-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:color-mix(in srgb,var(--head) 65%,white);border:1px solid var(--line);color:var(--ink);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background-color .15s ease;box-shadow:none !important}
+.switcher-recent-pill:hover{background:color-mix(in srgb,var(--head) 85%,white);box-shadow:none !important}
+.switcher-list{display:flex;flex-direction:column;gap:2px}
+.switcher-item{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;cursor:pointer;border:0;background:transparent;width:100%;text-align:left;transition:background-color .15s ease;box-shadow:none !important;text-decoration:none;color:var(--ink)}
+.switcher-item:hover, .switcher-item.selected{background:color-mix(in srgb,var(--head) 75%,white);box-shadow:none !important}
+.switcher-item.active-client{background:color-mix(in srgb,var(--head) 45%,white)}
+.switcher-item-logo{width:26px;height:26px;border-radius:7px;object-fit:cover;flex-shrink:0}
+.switcher-item-dot{width:26px;height:26px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0}
+.switcher-item-meta{flex:1;min-width:0;display:flex;flex-direction:column}
+.switcher-item-name{font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.switcher-item-sub{font-size:11px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.switcher-empty{padding:24px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--mute)}
+.switcher-footer{padding:8px 10px;display:flex;flex-direction:column;gap:6px;background:color-mix(in srgb,var(--head) 30%,transparent)}
+.switcher-footer-btn{border:0 !important;background:transparent !important;color:var(--ink) !important;font-size:12px !important;font-weight:600;padding:4px 8px !important;border-radius:6px !important;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:none !important}
+.switcher-footer-btn:hover{background:color-mix(in srgb,var(--head) 80%,white) !important;box-shadow:none !important}
+.switcher-footer-hints{display:flex;align-items:center;justify-content:space-between;font-size:10.5px;color:var(--mute);padding:0 4px}
+.switcher-footer-hints kbd{font-family:inherit;font-size:10px;font-weight:700;background:var(--bg);border:1px solid var(--line);border-radius:3px;padding:1px 4px}
+
+/* Print PDF Styles */
+@media print {
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  header, .bar, .client-subnav-bar, .modal-backdrop, button, input, select, textarea, .view-toggle, .msg {
+    display: none !important;
+  }
+  .wrap {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  #contentArea {
+    width: 100% !important;
+  }
+  .canvas-card {
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+  .white-canvas-doc {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+}
+</style>
 </head><body><div class="wrap" id="app"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="/assets/config.js"></script>
 <script>
 const sb=supabase.createClient(CFG.url,CFG.key),$=id=>document.getElementById(id),app=$("app");
+const pad=n=>String(n).padStart(2,"0");
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-let clients=[],cur=null,posts=[];
-const slugify=s=>s.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
-async function boot(){const {data:{session}}=await sb.auth.getSession();session?await home():loginView()}
-function loginView(msg=""){
- app.innerHTML=`<div class="panel login"><h2>Team login</h2><p class="muted">Content calendar admin</p><label>Email</label><input id="em" type="email" autocomplete="username"><label>Password</label><input id="pw" type="password" autocomplete="current-password"><p class="msg" id="msg">${esc(msg)}</p><div class="bar"><button class="pri" id="in">Log in</button><button id="up">Create account</button></div><p class="muted">The first account created becomes the admin. Later accounts need an admin's approval.</p></div>`;
- const go=async fn=>{$("msg").textContent="";const {error}=await fn($("em").value,$("pw").value);error?$("msg").textContent=error.message:boot()};
- $("in").onclick=()=>go((email,password)=>sb.auth.signInWithPassword({email,password}));
- $("up").onclick=()=>go((email,password)=>sb.auth.signUp({email,password}));
+const now=new Date(),TODAY=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+
+let clients=[],cur=null,posts=[],allPosts=[];
+let adminView="overview",adminCalY=now.getFullYear(),adminCalM=now.getMonth(),adminCalFilter="All",adminCalSel=TODAY;
+let showPastPosted=false;
+const isMac=typeof navigator!=="undefined"&&/Mac|iPhone|iPad|iPod/.test(navigator.platform||navigator.userAgent);
+const switcherKbdLabel=isMac?"⌘K":"Ctrl+K";
+let switcherOpen=false,switcherHighlightedIndex=0,switcherFilteredClients=[];
+
+function getRecentClientIds(){
+ try{
+  const raw=localStorage.getItem("tc_recent_cids");
+  if(!raw)return [];
+  const arr=JSON.parse(raw);
+  return Array.isArray(arr)?arr:[];
+ }catch(e){return [];}
 }
-const out=async()=>{await sb.auth.signOut();loginView()};
+
+function recordRecentClient(cid){
+ if(!cid)return;
+ try{
+  let list=getRecentClientIds().filter(id=>id!==cid);
+  list.unshift(cid);
+  list=list.slice(0,5);
+  localStorage.setItem("tc_recent_cids",JSON.stringify(list));
+ }catch(e){}
+}
+
+async function selectClientById(cid){
+ if(!cid){
+  cur=null;
+  shell();
+  await loadDashboard();
+ }else{
+  cur=clients.find(c=>c.id===cid)||null;
+  if(cur){
+   recordRecentClient(cur.id);
+   adminView="overview";
+   shell();
+   await loadPosts();
+  }else{
+   cur=null;
+   shell();
+   await loadDashboard();
+  }
+ }
+}
+const slugify=s=>s.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+function generateUniqueSlug(name, existingId=null){
+ let base=slugify(name)||"client";
+ let s=base,counter=2;
+ while(clients.some(cl=>cl.slug===s&&cl.id!==existingId)){
+  s=`${base}-${counter}`;
+  counter++;
+ }
+ return s;
+}
+
+async function boot(){
+ const {data:{session}}=await sb.auth.getSession();
+ session?await home():loginView();
+}
+
+function loginView(msg=""){
+ app.innerHTML=`<div class="panel login">
+  <h2>Team login</h2>
+  <p class="muted">Content calendar admin</p>
+  <label>Email</label>
+  <input id="em" type="email" autocomplete="username">
+  <label>Password</label>
+  <input id="pw" type="password" autocomplete="current-password">
+  <p class="msg" id="msg">${esc(msg)}</p>
+  <div class="bar">
+   <button class="pri" id="in"><span class="material-symbols-outlined">login</span> Log in</button>
+   <button id="up"><span class="material-symbols-outlined">person_add</span> Create account</button>
+  </div>
+  <p class="muted">The first account created becomes the admin. Later accounts need an admin's approval.</p>
+ </div>`;
+
+ const go=async(btn,fn,label,icon)=>{
+  $("msg").textContent="";
+  const em=$("em").value.trim(),pw=$("pw").value;
+  if(!em||!pw){$("msg").textContent="Please enter email and password.";return}
+  btn.disabled=true;
+  btn.innerHTML=`<span class="spinner"></span> ${label}…`;
+  try{
+   const {error}=await fn(em,pw);
+   if(error){
+    $("msg").textContent=error.message;
+    btn.disabled=false;
+    btn.innerHTML=`<span class="material-symbols-outlined">${icon}</span> ${label}`;
+   }else{
+    boot();
+   }
+  }catch(err){
+   $("msg").textContent=err.message||"An error occurred.";
+   btn.disabled=false;
+   btn.innerHTML=`<span class="material-symbols-outlined">${icon}</span> ${label}`;
+  }
+ };
+
+ $("in").onclick=()=>go($("in"),(email,password)=>sb.auth.signInWithPassword({email,password}),"Log in","login");
+ $("up").onclick=()=>go($("up"),(email,password)=>sb.auth.signUp({email,password}),"Create account","person_add");
+ [$("em"),$("pw")].forEach(inp=>inp.onkeydown=e=>{if(e.key==="Enter")$("in").click()});
+}
+
+const out=async()=>{await sb.auth.signOut();cur=null;loginView()};
+
 async function home(){
  const {data:tm}=await sb.from("team_members").select("user_id");
- if(!(tm&&tm.length)){app.innerHTML=`<div class="panel login"><h2>Waiting for access</h2><p class="muted">You're signed in, but an admin hasn't added you to the team yet.</p><button id="out">Log out</button></div>`;$("out").onclick=out;return}
- const {data}=await sb.from("clients").select("*").order("name");clients=data||[];
- cur=clients.find(c=>c.id===cur?.id)||clients[0]||null;shell();if(cur)await loadPosts()
+ if(!(tm&&tm.length)){
+  app.innerHTML=`<div class="panel login"><h2>Waiting for access</h2><p class="muted">You're signed in, but an admin hasn't added you to the team yet.</p><button id="out"><span class="material-symbols-outlined">logout</span> Log out</button></div>`;
+  $("out").onclick=out;
+  return;
+ }
+ const {data}=await sb.from("clients").select("*").order("name");
+ clients=data||[];
+
+ try{
+  const {data:accs}=await sb.from("client_accounts").select("client_id,username");
+  if(accs&&accs.length){
+   const m=Object.fromEntries(accs.map(a=>[a.client_id,a.username]));
+   clients=clients.map(cl=>({...cl,username:m[cl.id]||""}));
+  }
+ }catch(e){}
+
+ clients=clients.map(cl=>{
+  const cachedLogo=localStorage.getItem("tc_logo_"+cl.id);
+  return {...cl,logo_url:cl.logo_url||cachedLogo||""};
+ });
+
+ if(cur){cur=clients.find(c=>c.id===cur.id)||null}
+ shell();
+ if(cur){await loadPosts()}else{await loadDashboard()}
 }
+
+// Modal Manager
+function openModal(html){
+ closeModal();
+ const modalEl=document.createElement("div");
+ modalEl.id="appModal";
+ modalEl.className="modal-backdrop";
+ modalEl.innerHTML=`<div class="modal-box">${html}</div>`;
+ document.body.appendChild(modalEl);
+ modalEl.onclick=e=>{if(e.target===modalEl)closeModal()};
+ return modalEl;
+}
+function closeModal(){
+ const m=$("appModal");
+ if(m)m.remove();
+}
+
+function closeHeaderMenu(){
+ const m=$("headerDropdown");
+ if(m)m.classList.remove("open");
+}
+
+function renderSwitcherList(query=""){
+ const body=$("switcherBody");
+ if(!body)return;
+ const q=(query||"").trim().toLowerCase();
+ const clearBtn=$("switcherClearBtn");
+ if(clearBtn)clearBtn.style.display=q?"inline-flex":"none";
+
+ const recents=getRecentClientIds().map(id=>clients.find(c=>c.id===id)).filter(Boolean);
+
+ let filtered=[];
+ if(!q){
+  filtered=clients;
+ }else{
+  filtered=clients.filter(c=>{
+   const n=(c.name||"").toLowerCase();
+   const u=(c.username||"").toLowerCase();
+   const s=(c.slug||"").toLowerCase();
+   return n.includes(q)||u.includes(q)||s.includes(q);
+  });
+ }
+ switcherFilteredClients=filtered;
+ if(switcherHighlightedIndex>=filtered.length){
+  switcherHighlightedIndex=Math.max(0,filtered.length-1);
+ }
+
+ let html="";
+
+ if(!q&&recents.length>0){
+  html+=`
+   <div class="switcher-section-title">
+    <span>Recent</span>
+   </div>
+   <div class="switcher-recent-row">
+    ${recents.map(rc=>`
+     <button type="button" class="switcher-recent-pill" data-switcher-cid="${rc.id}" title="${esc(rc.name)}">
+      ${rc.logo_url?`
+       <img src="${esc(rc.logo_url)}" style="width:16px;height:16px;border-radius:4px;object-fit:cover" alt="">
+      `:`
+       <span class="color-dot" style="background:${rc.accent_color||'#D97757'};width:8px;height:8px"></span>
+      `}
+      <span style="max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(rc.name)}</span>
+     </button>
+    `).join("")}
+   </div>
+   <div class="fab-divider" style="margin:2px 0 4px"></div>
+  `;
+ }
+
+ html+=`
+  <div class="switcher-section-title">
+   <span>${q?"Matching Clients":"All Clients"}</span>
+   <span style="font-weight:600;font-size:10.5px">${filtered.length}</span>
+  </div>
+ `;
+
+ if(filtered.length===0){
+  html+=`
+   <div class="switcher-empty">
+    <span class="material-symbols-outlined" style="font-size:26px;color:var(--mute);margin-bottom:6px">search_off</span>
+    <div style="font-size:13px;font-weight:600;color:var(--ink)">No clients found</div>
+    <div style="font-size:11.5px;color:var(--mute);margin-top:2px">No match for "${esc(q)}"</div>
+   </div>
+  `;
+ }else{
+  html+=`<div class="switcher-list" id="switcherItemsList">`;
+  filtered.forEach((c,idx)=>{
+   const isCur=cur&&cur.id===c.id;
+   const isSelected=idx===switcherHighlightedIndex;
+   const postCount=allPosts&&allPosts.length?allPosts.filter(p=>p.client_id===c.id).length:null;
+   html+=`
+    <button type="button"
+     class="switcher-item ${isCur?'active-client':''} ${isSelected?'selected':''}"
+     data-switcher-cid="${c.id}"
+     data-switcher-index="${idx}"
+     role="option"
+     aria-selected="${isCur?'true':'false'}">
+     ${c.logo_url?`
+      <img src="${esc(c.logo_url)}" class="switcher-item-logo" alt="">
+     `:`
+      <span class="switcher-item-dot" style="background:${c.accent_color||'#D97757'}">
+       ${esc((c.name.charAt(0)||'C').toUpperCase())}
+      </span>
+     `}
+     <div class="switcher-item-meta">
+      <div class="switcher-item-name">${esc(c.name)}</div>
+      <div class="switcher-item-sub">
+       ${c.username?`@${esc(c.username)}`:(c.slug?`/${esc(c.slug)}`:esc(c.name))}
+       ${postCount!==null?` · ${postCount} post${postCount===1?'':'s'}`:''}
+      </div>
+     </div>
+     ${isCur?`
+      <span class="material-symbols-outlined" style="font-size:18px;color:var(--sel);margin-left:auto;flex-shrink:0">check</span>
+     `:''}
+    </button>
+   `;
+  });
+  html+=`</div>`;
+ }
+
+ body.innerHTML=html;
+
+ body.querySelectorAll("[data-switcher-cid]").forEach(btn=>{
+  btn.onclick=async e=>{
+   e.stopPropagation();
+   const cid=btn.dataset.switcherCid;
+   closeClientSwitcher();
+   await selectClientById(cid);
+  };
+  btn.onmouseenter=()=>{
+   if(btn.dataset.switcherIndex!==undefined){
+    switcherHighlightedIndex=parseInt(btn.dataset.switcherIndex,10);
+    updateSwitcherHighlightDOM();
+   }
+  };
+ });
+}
+
+function updateSwitcherHighlightDOM(){
+ const items=document.querySelectorAll("#switcherItemsList .switcher-item");
+ items.forEach((item,idx)=>{
+  if(idx===switcherHighlightedIndex){
+   item.classList.add("selected");
+   item.scrollIntoView({block:"nearest"});
+  }else{
+   item.classList.remove("selected");
+  }
+ });
+}
+
+function moveSwitcherHighlight(delta){
+ if(!switcherFilteredClients.length)return;
+ switcherHighlightedIndex=(switcherHighlightedIndex+delta+switcherFilteredClients.length)%switcherFilteredClients.length;
+ updateSwitcherHighlightDOM();
+}
+
+async function selectHighlightedSwitcherItem(){
+ if(switcherFilteredClients.length>0&&switcherFilteredClients[switcherHighlightedIndex]){
+  const chosen=switcherFilteredClients[switcherHighlightedIndex];
+  closeClientSwitcher();
+  await selectClientById(chosen.id);
+ }
+}
+
+function openClientSwitcher(){
+ const pop=$("clientSwitcherDropdown");
+ const btn=$("clientSwitcherBtn");
+ if(!pop||!btn)return;
+ closeHeaderMenu();
+ pop.classList.add("open");
+ btn.setAttribute("aria-expanded","true");
+ switcherOpen=true;
+
+ const inp=$("switcherSearchInput");
+ if(inp){
+  inp.value="";
+  setTimeout(()=>inp.focus(),20);
+ }
+
+ if(cur){
+  const idx=clients.findIndex(c=>c.id===cur.id);
+  switcherHighlightedIndex=idx>=0?idx:0;
+ }else{
+  switcherHighlightedIndex=0;
+ }
+ renderSwitcherList("");
+}
+
+function closeClientSwitcher(){
+ const pop=$("clientSwitcherDropdown");
+ const btn=$("clientSwitcherBtn");
+ if(pop)pop.classList.remove("open");
+ if(btn)btn.setAttribute("aria-expanded","false");
+ switcherOpen=false;
+}
+
+function wireClientSwitcher(){
+ const sBtn=$("clientSwitcherBtn");
+ if(sBtn){
+  sBtn.onclick=e=>{
+   e.stopPropagation();
+   if(switcherOpen){
+    closeClientSwitcher();
+   }else{
+    openClientSwitcher();
+   }
+  };
+ }
+
+ const sHome=$("switcherHomeBtn");
+ if(sHome){
+  sHome.onclick=async e=>{
+   e.stopPropagation();
+   closeClientSwitcher();
+   await selectClientById(null);
+  };
+ }
+
+ const sNew=$("switcherNewBtn");
+ if(sNew){
+  sNew.onclick=e=>{
+   e.stopPropagation();
+   closeClientSwitcher();
+   clientForm(null);
+  };
+ }
+
+ const sInput=$("switcherSearchInput");
+ if(sInput){
+  sInput.oninput=e=>{
+   switcherHighlightedIndex=0;
+   renderSwitcherList(e.target.value);
+  };
+  sInput.onclick=e=>e.stopPropagation();
+  sInput.onkeydown=e=>{
+   if(e.key==="ArrowDown"){
+    e.preventDefault();
+    moveSwitcherHighlight(1);
+   }else if(e.key==="ArrowUp"){
+    e.preventDefault();
+    moveSwitcherHighlight(-1);
+   }else if(e.key==="Enter"){
+    e.preventDefault();
+    selectHighlightedSwitcherItem();
+   }else if(e.key==="Escape"){
+    e.preventDefault();
+    closeClientSwitcher();
+    $("clientSwitcherBtn")?.focus();
+   }
+  };
+ }
+
+ const sClear=$("switcherClearBtn");
+ if(sClear){
+  sClear.onclick=e=>{
+   e.stopPropagation();
+   if(sInput){
+    sInput.value="";
+    sInput.focus();
+    switcherHighlightedIndex=0;
+    renderSwitcherList("");
+   }
+  };
+ }
+}
+
 function shell(){
- app.innerHTML=`<header><div><h1>Calendar admin</h1><p>Manage clients and posts</p></div><button id="out">Log out</button></header>
- <div class="bar"><select id="cs" style="max-width:280px" aria-label="Client">${clients.map(c=>`<option value="${c.id}" ${c.id===cur?.id?"selected":""}>${esc(c.name)}</option>`).join("")}</select><button id="addc">+ New client</button>${cur?`<button id="editc">Edit client</button><a class="muted" target="_blank" rel="noopener" href="https://${esc(cur.slug)}.thynkculture.com">Open calendar</a>`:""}<span class="sp"></span>${cur?`<button class="pri" id="addp">+ Add post</button>`:""}</div>
- <div id="form"></div><div class="panel" id="list"><p class="muted">${cur?"Loading posts…":"No clients yet. Create one to start."}</p></div>`;
- $("out").onclick=out;$("addc").onclick=()=>clientForm(null);
- if(cur){$("cs").onchange=async e=>{cur=clients.find(c=>c.id===e.target.value);shell();await loadPosts()};$("editc").onclick=()=>clientForm(cur);$("addp").onclick=()=>postForm({})}
+ app.innerHTML=`
+  <header>
+   <div>
+    ${cur?`
+     <div style="display:flex;align-items:center;gap:12px">
+      ${cur.logo_url?`
+       <img src="${esc(cur.logo_url)}" class="client-logo-avatar" style="width:44px;height:44px;border-radius:12px">
+      `:`
+       <span class="client-logo-placeholder" style="width:44px;height:44px;border-radius:12px;background:${cur.accent_color||'#D97757'};font-size:18px">
+        ${esc(cur.name.charAt(0).toUpperCase())}
+       </span>
+      `}
+      <div>
+       <h1 style="margin:0">${esc(cur.name)}</h1>
+       <p style="margin:2px 0 0">Client content & posts</p>
+      </div>
+     </div>
+    `:`
+     <div>
+      <h1> Admin</h1>
+      <p>Operations & content dashboard</p>
+     </div>
+    `}
+   </div>
+   <div style="display:flex;align-items:center;gap:8px;position:relative">
+    <!-- Home Button in Header next to Menu -->
+    <button id="homeBtn" class="${!cur?'on':''}">
+     <span class="material-symbols-outlined">home</span> Home
+    </button>
+    <button id="headerMenuBtn">
+     <span class="material-symbols-outlined">menu</span> Menu
+    </button>
+    <button id="out">
+     <span class="material-symbols-outlined">logout</span> Log out
+    </button>
+    <!-- Anchored Header Menu Dropdown -->
+    <div class="header-dropdown" id="headerDropdown">
+     <div style="padding:4px 10px 8px;font-weight:700;font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em">Navigation</div>
+     <button class="fab-item" id="menuHome"><span class="material-symbols-outlined">home</span> Home Dashboard</button>
+     <button class="fab-item" id="menuNewClient"><span class="material-symbols-outlined">person_add</span> New Client</button>
+     ${cur?`<button class="fab-item danger" id="menuDelClient"><span class="material-symbols-outlined">delete</span> Delete active client</button>`:""}
+     <div class="fab-divider"></div>
+     <div style="padding:4px 10px;font-size:11px;color:var(--mute);text-transform:uppercase;font-weight:600">Clients (${clients.length})</div>
+     <div style="max-height:160px;overflow-y:auto;display:flex;flex-direction:column;gap:1px">
+      ${clients.map(c=>`
+       <button class="fab-item" data-menucid="${c.id}">
+        ${c.logo_url?`
+         <img src="${esc(c.logo_url)}" style="width:18px;height:18px;border-radius:4px;object-fit:cover">
+        `:`
+         <span class="color-dot" style="background:${c.accent_color||'#D97757'};width:8px;height:8px"></span>
+        `}
+        ${esc(c.name)}
+       </button>
+      `).join("")}
+     </div>
+     <div class="fab-divider"></div>
+     <a class="fab-item" href="https://client.thynkculture.com" target="_blank" rel="noopener"><span class="material-symbols-outlined">open_in_new</span> Open Client Portal</a>
+     <div class="fab-divider"></div>
+     <button class="fab-item danger" id="menuOut"><span class="material-symbols-outlined">logout</span> Log out</button>
+    </div>
+   </div>
+  </header>
+
+  <!-- Top Action Bar -->
+  <div class="bar">
+   <!-- Interactive Workspace Switcher (Option 1) -->
+   <div class="client-switcher-wrap" id="clientSwitcherWrap">
+    <button type="button" class="client-switcher-btn" id="clientSwitcherBtn" aria-expanded="false" aria-haspopup="listbox" title="Switch client (${switcherKbdLabel})">
+     ${cur?`
+      ${cur.logo_url?`
+       <img src="${esc(cur.logo_url)}" class="switcher-btn-logo" alt="">
+      `:`
+       <span class="switcher-btn-dot" style="background:${cur.accent_color||'#D97757'}">
+        ${esc((cur.name.charAt(0)||'C').toUpperCase())}
+       </span>
+      `}
+      <span class="switcher-btn-name">${esc(cur.name)}</span>
+     `:`
+      <span class="material-symbols-outlined" style="font-size:18px;color:var(--mute)">switch_account</span>
+      <span class="switcher-btn-name">Select client <span style="font-size:11px;color:var(--mute);font-weight:500">(${clients.length})</span></span>
+     `}
+     <span class="material-symbols-outlined switcher-chevron">unfold_more</span>
+     <kbd class="switcher-kbd">${switcherKbdLabel}</kbd>
+    </button>
+
+    <!-- Floating Command Popover -->
+    <div class="client-switcher-popover" id="clientSwitcherDropdown" role="listbox">
+     <div class="switcher-search-box">
+      <span class="material-symbols-outlined" style="font-size:18px;color:var(--mute)">search</span>
+      <input type="text" id="switcherSearchInput" class="switcher-search-input" placeholder="Search ${clients.length} clients... (name, @handle, slug)" autocomplete="off" spellcheck="false">
+      <button type="button" class="switcher-search-clear" id="switcherClearBtn" style="display:none" title="Clear search">
+       <span class="material-symbols-outlined" style="font-size:16px;color:var(--mute)">close</span>
+      </button>
+     </div>
+     <div class="switcher-body" id="switcherBody"></div>
+     <div class="fab-divider" style="margin:0"></div>
+     <div class="switcher-footer">
+      <div style="display:flex;align-items:center;gap:6px">
+       <button type="button" class="switcher-footer-btn" id="switcherHomeBtn" title="Go to all clients overview">
+        <span class="material-symbols-outlined" style="font-size:15px">home</span> All Clients (Home)
+       </button>
+       <button type="button" class="switcher-footer-btn" id="switcherNewBtn" title="Create a new client">
+        <span class="material-symbols-outlined" style="font-size:15px">person_add</span> New Client
+       </button>
+      </div>
+      <div class="switcher-footer-hints">
+       <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+       <span><kbd>↵</kbd> select</span>
+       <span><kbd>esc</kbd> close</span>
+      </div>
+     </div>
+    </div>
+   </div>
+   <button id="addc"><span class="material-symbols-outlined">person_add</span> New client</button>
+   ${cur?`
+    <button id="editc"><span class="material-symbols-outlined">edit</span> Edit client</button>
+    <button class="danger" id="delc"><span class="material-symbols-outlined">delete</span> Delete client</button>
+    <a class="muted" target="_blank" rel="noopener" href="https://client.thynkculture.com" style="display:inline-flex;align-items:center;gap:4px">
+     <span class="material-symbols-outlined">open_in_new</span> Portal
+    </a>
+   `:""}
+  </div>
+
+  <!-- Pinned Client Subnav Bar (Light Mode) -->
+  ${cur?`
+   <div class="client-subnav-bar">
+    <div class="view-toggle">
+     <button class="view-btn ${adminView==='overview'?'on':''}" id="btnVOverview">
+      <span class="material-symbols-outlined">dashboard</span> Overview
+     </button>
+     <button class="view-btn ${adminView==='list'?'on':''}" id="btnVList">
+      <span class="material-symbols-outlined">format_list_bulleted</span> List
+     </button>
+     <button class="view-btn ${adminView==='cal'?'on':''}" id="btnVCal">
+      <span class="material-symbols-outlined">calendar_month</span> Calendar
+     </button>
+     <button class="view-btn ${adminView==='feed'?'on':''}" id="btnVFeed">
+      <span class="material-symbols-outlined">grid_on</span> Feed
+     </button>
+     <button class="view-btn ${adminView==='strategy'?'on':''}" id="btnVStrategy">
+      <span class="material-symbols-outlined">lightbulb</span> Strategy
+     </button>
+     <button class="view-btn ${adminView==='docs'?'on':''}" id="btnVDocs">
+      <span class="material-symbols-outlined">folder</span> Docs
+     </button>
+     <button class="view-btn ${adminView==='reports'?'on':''}" id="btnVReports">
+      <span class="material-symbols-outlined">analytics</span> Reports
+     </button>
+    </div>
+    <span class="sp"></span>
+    <button class="pri" id="subnavAddPost">
+     <span class="material-symbols-outlined">add_circle</span> Add post
+    </button>
+   </div>
+  `:""}
+
+  <div id="contentArea"></div>`;
+
+ $("out").onclick=out;
+ $("homeBtn").onclick=()=>{selectClientById(null)};
+ $("addc").onclick=()=>clientForm(null);
+ wireClientSwitcher();
+ if(cur){
+  $("editc").onclick=()=>clientForm(cur);
+  $("delc").onclick=()=>confirmDeleteClient(cur);
+
+  // Pinned subnav button wiring
+  $("btnVOverview").onclick=()=>{adminView="overview";updateSubnavActive();renderClientOverview()};
+  $("btnVList").onclick=()=>{adminView="list";updateSubnavActive();renderList()};
+  $("btnVCal").onclick=()=>{adminView="cal";updateSubnavActive();renderCalendarView()};
+  $("btnVFeed").onclick=()=>{adminView="feed";updateSubnavActive();renderFeedView()};
+  $("btnVStrategy").onclick=()=>{adminView="strategy";updateSubnavActive();renderStrategyView()};
+  $("btnVDocs").onclick=()=>{adminView="docs";updateSubnavActive();renderDocsView()};
+  $("btnVReports").onclick=()=>{adminView="reports";updateSubnavActive();renderReportsView()};
+  $("subnavAddPost").onclick=()=>postForm({});
+ }
+
+ // Menu Dropdown wiring next to logout
+ const hm=$("headerMenuBtn"),hd=$("headerDropdown");
+ hm.onclick=e=>{e.stopPropagation();hd.classList.toggle("open")};
+ $("menuHome").onclick=()=>{closeHeaderMenu();selectClientById(null)};
+ $("menuNewClient").onclick=()=>{closeHeaderMenu();clientForm(null)};
+ const mdel=$("menuDelClient");
+ if(mdel) mdel.onclick=()=>{closeHeaderMenu();confirmDeleteClient(cur)};
+ $("menuOut").onclick=()=>{out();closeHeaderMenu()};
+ hd.querySelectorAll("[data-menucid]").forEach(b=>{
+  b.onclick=async()=>{
+   const cid=b.dataset.menucid;
+   closeHeaderMenu();
+   await selectClientById(cid);
+  };
+ });
 }
-async function loadPosts(){const {data}=await sb.from("posts").select("*").eq("client_id",cur.id).order("post_date");posts=data||[];renderList()}
+
+function updateSubnavActive(){
+ if(!$("btnVOverview"))return;
+ $("btnVOverview").className=`view-btn ${adminView==='overview'?'on':''}`;
+ $("btnVList").className=`view-btn ${adminView==='list'?'on':''}`;
+ $("btnVCal").className=`view-btn ${adminView==='cal'?'on':''}`;
+ $("btnVFeed").className=`view-btn ${adminView==='feed'?'on':''}`;
+ $("btnVStrategy").className=`view-btn ${adminView==='strategy'?'on':''}`;
+ $("btnVDocs").className=`view-btn ${adminView==='docs'?'on':''}`;
+ $("btnVReports").className=`view-btn ${adminView==='reports'?'on':''}`;
+}
+
+window.addEventListener("click",e=>{
+ const m=$("headerDropdown"),b=$("headerMenuBtn");
+ if(m&&!m.contains(e.target)&&b&&!b.contains(e.target))closeHeaderMenu();
+
+ const swWrap=$("clientSwitcherWrap");
+ if(swWrap&&!swWrap.contains(e.target))closeClientSwitcher();
+});
+
+window.addEventListener("keydown",e=>{
+ if((e.metaKey||e.ctrlKey)&&(e.key==="k"||e.key==="K")){
+  e.preventDefault();
+  if(switcherOpen){
+   closeClientSwitcher();
+  }else{
+   openClientSwitcher();
+  }
+  return;
+ }
+
+ if(switcherOpen){
+  if(e.key==="Escape"){
+   e.preventDefault();
+   closeClientSwitcher();
+   $("clientSwitcherBtn")?.focus();
+  }else if(e.key==="ArrowDown"){
+   e.preventDefault();
+   moveSwitcherHighlight(1);
+  }else if(e.key==="ArrowUp"){
+   e.preventDefault();
+   moveSwitcherHighlight(-1);
+  }else if(e.key==="Enter"){
+   e.preventDefault();
+   selectHighlightedSwitcherItem();
+  }
+ }
+});
+
+// Universal Popup Modal for Delete Actions
+function confirmModal({ title, message, confirmText="Delete", requireMatch=null, onConfirm }){
+ const existing=$("customModal");
+ if(existing)existing.remove();
+
+ const modalEl=document.createElement("div");
+ modalEl.id="customModal";
+ modalEl.className="modal-backdrop";
+ modalEl.innerHTML=`
+  <div class="modal-box">
+   <div class="modal-header">
+    <span class="material-symbols-outlined modal-icon-warn">warning</span>
+    <h3>${title}</h3>
+   </div>
+   <div class="modal-body">${message}</div>
+   ${requireMatch?`
+    <div style="margin-top:12px">
+     <label style="font-size:13px;color:var(--mute)">Type <b>${esc(requireMatch)}</b> below to verify:</label>
+     <input id="modalMatchInput" placeholder="${esc(requireMatch)}" autocomplete="off" style="margin-top:4px">
+    </div>
+   `:""}
+   <div class="bar modal-actions">
+    <span class="sp"></span>
+    <button id="modalCancelBtn" type="button">Cancel</button>
+    <button class="danger" id="modalConfirmBtn" type="button" ${requireMatch?'disabled':''}>
+     <span class="material-symbols-outlined" style="font-size:16px">delete</span> ${confirmText}
+    </button>
+   </div>
+  </div>`;
+ document.body.appendChild(modalEl);
+
+ const close=()=>modalEl.remove();
+ $("modalCancelBtn").onclick=close;
+ modalEl.onclick=e=>{if(e.target===modalEl)close()};
+
+ if(requireMatch){
+  const inp=$("modalMatchInput");
+  const btn=$("modalConfirmBtn");
+  inp.focus();
+  inp.oninput=()=>{
+   btn.disabled=inp.value.trim().toLowerCase()!==requireMatch.trim().toLowerCase();
+  };
+  inp.onkeydown=e=>{
+   if(e.key==="Enter"&&!btn.disabled)$("modalConfirmBtn").click();
+  };
+ }
+
+ $("modalConfirmBtn").onclick=async()=>{
+  $("modalConfirmBtn").disabled=true;
+  $("modalConfirmBtn").innerHTML=`<span class="spinner"></span> Deleting…`;
+  try{
+   await onConfirm();
+   close();
+  }catch(err){
+   alert("Error: "+(err.message||err));
+   close();
+  }
+ };
+}
+
+function confirmDeletePost(postId){
+ if(!postId||postId==="undefined")return;
+ const p=posts.find(x=>x.id===postId)||allPosts.find(x=>x.id===postId);
+ const info=p?`(${esc(p.type)} · ${esc(p.pillar)} on ${p.post_date})`:"";
+ confirmModal({
+  title:"Delete post?",
+  message:`Are you sure you want to delete this scheduled post <b>${info}</b>? This action cannot be undone.`,
+  confirmText:"Delete post",
+  onConfirm:async()=>{
+   const {error}=await sb.from("posts").delete().eq("id",postId);
+   if(error)throw error;
+   if(cur)await loadPosts();
+   else await loadDashboard();
+  }
+ });
+}
+
+function confirmDeleteClient(targetClient){
+ const client=targetClient||cur;
+ if(!client||!client.id||client.id==="undefined")return;
+ confirmModal({
+  title:`Delete client "${esc(client.name)}"?`,
+  message:`This will permanently delete <b>${esc(client.name)}</b>, their logo, client portal login credentials, and all scheduled calendar posts.<br><br>This action cannot be undone.`,
+  requireMatch:client.name,
+  confirmText:"Delete Client Permanently",
+  onConfirm:async()=>{
+   const clientId=client.id;
+   await sb.from("posts").delete().eq("client_id",clientId);
+   try{await sb.from("client_accounts").delete().eq("client_id",clientId)}catch(e){}
+   localStorage.removeItem("tc_logo_"+clientId);
+   localStorage.removeItem("tc_canvas_"+clientId);
+   try{
+    let list=getRecentClientIds().filter(id=>id!==clientId);
+    localStorage.setItem("tc_recent_cids",JSON.stringify(list));
+   }catch(e){}
+   const {error}=await sb.from("clients").delete().eq("id",clientId);
+   if(error)throw error;
+   if(cur&&cur.id===clientId)cur=null;
+   await home();
+  }
+ });
+}
+
+async function loadDashboard(){
+ $("contentArea").innerHTML=`<div class="panel"><p class="muted">Loading dashboard overview…</p></div>`;
+ const {data}=await sb.from("posts").select("*").order("post_date",{ascending:true});
+ allPosts=data||[];
+
+ const totalClients=clients.length;
+ const totalPosts=allPosts.length;
+ const readyPosts=allPosts.filter(p=>p.status==="ready"||p.status==="posted").length;
+ const posters=allPosts.filter(p=>p.type==="Poster").length;
+ const reels=allPosts.filter(p=>p.type==="Reel").length;
+
+ const postsByClient={};
+ clients.forEach(c=>{postsByClient[c.id]=[]});
+ allPosts.forEach(p=>{
+  if(postsByClient[p.client_id])postsByClient[p.client_id].push(p);
+ });
+
+ const todayStr=new Date().toISOString().slice(0,10);
+ const upcoming=allPosts.filter(p=>p.post_date>=todayStr).slice(0,8);
+ const recentQueue=upcoming.length?upcoming:allPosts.slice(-8);
+ const clientMap=Object.fromEntries(clients.map(c=>[c.id,c]));
+
+ $("contentArea").innerHTML=`
+  <div class="kpi-grid">
+   <div class="kpi"><span>Clients</span><b>${totalClients}</b></div>
+   <div class="kpi"><span>Total Planned</span><b>${totalPosts}</b></div>
+   <div class="kpi"><span>Ready / Posted</span><b>${readyPosts}</b></div>
+   <div class="kpi"><span>Content Mix</span><b style="font-size:19px;margin-top:6px">${posters} <span style="font-size:13px;color:var(--mute)">posters</span> · ${reels} <span style="font-size:13px;color:var(--mute)">reels</span></b></div>
+  </div>
+
+  <div class="panel">
+   <h2>Clients Overview</h2>
+   <p class="muted">Select a client below or use the dropdown to manage content</p>
+   ${clients.length?`
+    <div class="client-cards">
+     ${clients.map(c=>{
+      const cp=postsByClient[c.id]||[];
+      const cr=cp.filter(p=>p.status==="ready"||p.status==="posted").length;
+      return `
+       <div class="client-card" data-cid="${c.id}">
+        <div class="client-card-head">
+         <div class="client-title">
+          ${c.logo_url?`
+           <img src="${esc(c.logo_url)}" alt="${esc(c.name)}" class="client-logo-avatar">
+          `:`
+           <span class="client-logo-placeholder" style="background:${c.accent_color||'#D97757'}">
+            ${esc(c.name.charAt(0).toUpperCase())}
+           </span>
+          `}
+          <div>
+           <span style="font-weight:600;font-size:16px;display:block">${esc(c.name)}</span>
+           ${c.username?`<span class="muted" style="font-size:12px">@${esc(c.username)}</span>`:''}
+          </div>
+         </div>
+        </div>
+        <div class="client-stats">
+         <div><b>${cp.length}</b> posts</div>
+         <div><b>${cr}</b> ready</div>
+        </div>
+        <button style="width:100%;font-size:13px;padding:6px 0;margin-top:6px" data-open="${c.id}">
+         Manage content <span class="material-symbols-outlined" style="font-size:16px">arrow_forward</span>
+        </button>
+       </div>`;
+     }).join("")}
+    </div>
+   `:`<p class="muted" style="margin-top:10px">No clients added yet. Click "+ New client" above.</p>`}
+  </div>
+
+  ${recentQueue.length?`
+   <div class="panel" style="margin-top:16px">
+    <h2>${upcoming.length?"Upcoming Schedule":"Recent Posts"}</h2>
+    <p class="muted">Content pipeline across all clients</p>
+    <div style="margin-top:10px">
+     ${recentQueue.map(p=>{
+      const cl=clientMap[p.client_id];
+      const isPosted=p.status==="posted";
+      return `
+       <div class="row" style="cursor:pointer" data-viewclient="${p.client_id}">
+        <b class="d">${p.post_date}</b>
+        <div>
+         <span class="tag" style="background:${cl?.accent_color||'#888'}20;color:var(--ink);border:1px solid ${cl?.accent_color||'#888'}55;margin-right:6px">${esc(cl?.name||'Client')}</span>
+         <b>${esc(p.type)}</b> · ${esc(p.pillar)}
+         <div class="muted">${esc(p.content||'—')}</div>
+        </div>
+        <div style="text-align:right;display:flex;align-items:center;gap:8px">
+         <button class="tick-btn ${isPosted?'ticked':''}" data-tick="${p.id}" title="${isPosted?'Click to unpost':'Click to mark as posted'}">
+          <span class="material-symbols-outlined" style="font-size:16px;color:${isPosted?'#2E7D32':'inherit'}">${isPosted?'check_circle':'radio_button_unchecked'}</span>
+          ${isPosted?'Posted':'Post'}
+         </button>
+         <button style="font-size:12px;padding:4px 10px" data-editpost="${p.client_id}" data-pid="${p.id}">
+          <span class="material-symbols-outlined" style="font-size:14px">edit</span> Edit
+         </button>
+         <button class="danger" style="font-size:12px;padding:4px 8px" data-delpost="${p.id}" title="Delete post">
+          <span class="material-symbols-outlined" style="font-size:16px">delete</span>
+         </button>
+        </div>
+       </div>`;
+     }).join("")}
+    </div>
+   </div>
+  `:""}
+ `;
+
+ $("contentArea").querySelectorAll("[data-cid]").forEach(card=>{
+  card.onclick=()=>{
+   const cid=card.dataset.cid;
+   selectClientById(cid);
+  };
+ });
+
+ $("contentArea").querySelectorAll("[data-open]").forEach(btn=>{
+  btn.onclick=e=>{
+   e.stopPropagation();
+   const cid=btn.dataset.open;
+   selectClientById(cid);
+  };
+ });
+
+ $("contentArea").querySelectorAll("[data-viewclient]").forEach(row=>{
+  row.onclick=()=>{
+   const cid=row.dataset.viewclient;
+   selectClientById(cid);
+  };
+ });
+
+ $("contentArea").querySelectorAll("[data-editpost]").forEach(btn=>{
+  btn.onclick=e=>{
+   e.stopPropagation();
+   const cid=btn.dataset.editpost,pid=btn.dataset.pid;
+   recordRecentClient(cid);
+   cur=clients.find(c=>c.id===cid)||null;
+   adminView="overview";
+   shell();
+   if(cur){
+    loadPosts().then(()=>{
+     const found=posts.find(p=>p.id===pid);
+     if(found)postForm(found);
+    });
+   }
+  };
+ });
+
+ $("contentArea").querySelectorAll("[data-delpost]").forEach(btn=>{
+  btn.onclick=e=>{
+   e.stopPropagation();
+   confirmDeletePost(btn.dataset.delpost);
+  };
+ });
+
+ $("contentArea").querySelectorAll("[data-tick]").forEach(btn=>{
+  btn.onclick=e=>{
+   e.stopPropagation();
+   togglePosted(btn.dataset.tick);
+  };
+ });
+}
+
+async function loadPosts(){
+ if(!cur||!cur.id||cur.id==="undefined")return;
+ $("contentArea").innerHTML=`<div class="panel"><p class="muted">Loading client content…</p></div>`;
+ const {data}=await sb.from("posts").select("*").eq("client_id",cur.id).order("post_date");
+ posts=data||[];
+ if(adminView==="overview") renderClientOverview();
+ else if(adminView==="cal") renderCalendarView();
+ else if(adminView==="feed") renderFeedView();
+ else if(adminView==="strategy") renderStrategyView();
+ else if(adminView==="docs") renderDocsView();
+ else if(adminView==="reports") renderReportsView();
+ else renderList();
+}
+
+async function togglePosted(postId){
+ if(!postId||postId==="undefined")return;
+ const post=posts.find(p=>p.id===postId)||allPosts.find(p=>p.id===postId);
+ if(!post)return;
+ const newStatus=post.status==="posted"?"planned":"posted";
+ post.status=newStatus;
+
+ if(cur){
+  if(adminView==="overview") renderClientOverview();
+  else if(adminView==="cal") renderCalendarView();
+  else if(adminView==="feed") renderFeedView();
+  else if(adminView==="strategy") renderStrategyView();
+  else if(adminView==="docs") renderDocsView();
+  else if(adminView==="reports") renderReportsView();
+  else renderList();
+ }else{
+  loadDashboard();
+ }
+
+ try{
+  const {error}=await sb.from("posts").update({status:newStatus,updated_at:new Date().toISOString()}).eq("id",postId);
+  if(error){
+   console.error("Error toggling status:",error);
+   alert("Failed to update status: "+error.message);
+   if(cur)loadPosts();
+  }
+ }catch(err){console.error(err)}
+}
+
+// 0. Client Overview Screen (Default Screen for Client View in Admin)
+function renderClientOverview(){
+ const canvas=getClientCanvas(cur);
+ const nowM=now.getMonth(),nowY=now.getFullYear();
+ const thisMonthPrefix=`${nowY}-${pad(nowM+1)}`;
+ const monthPosts=posts.filter(p=>p.post_date&&p.post_date.startsWith(thisMonthPrefix));
+ const postedCount=posts.filter(p=>p.status==="posted").length;
+ const readyCount=posts.filter(p=>p.status==="ready").length;
+ const inProgressCount=posts.length - postedCount;
+ const pct=posts.length?Math.round((postedCount/posts.length)*100):0;
+ 
+ // Upcoming scheduled posts (today or future)
+ const upcomingPosts=posts
+  .filter(p=>p.post_date>=TODAY&&p.status!=="posted")
+  .sort((a,b)=>a.post_date.localeCompare(b.post_date))
+  .slice(0,5);
+
+ $("contentArea").innerHTML=`
+  <!-- Client Identity Card -->
+  <div class="panel" style="margin-top:0">
+   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+    <div style="display:flex;align-items:center;gap:14px">
+     ${cur.logo_url?`
+      <img src="${esc(cur.logo_url)}" class="client-logo-avatar" style="width:52px;height:52px;border-radius:14px">
+     `:`
+      <div class="client-logo-placeholder" style="width:52px;height:52px;border-radius:14px;background:${cur.accent_color||'#D97757'};font-size:22px">
+       ${esc(cur.name.slice(0,2).toUpperCase())}
+      </div>
+     `}
+     <div>
+      <div style="display:flex;align-items:center;gap:8px">
+       <h2 style="margin:0;font-size:22px">${esc(cur.name)}</h2>
+       <span class="tag" style="background:#E8F5E9;color:#1B5E20;font-size:11px;padding:2px 8px">Active Client</span>
+      </div>
+      <p class="muted" style="margin:3px 0 0;font-size:13px">
+       ${cur.username?`Portal login: <b>@${esc(cur.username)}</b> · `:''}
+       Slug: <code>${esc(cur.slug)}</code>
+      </p>
+     </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+     <button id="coEditClient"><span class="material-symbols-outlined">edit</span> Edit Client</button>
+     <a class="fab-item" target="_blank" rel="noopener" href="https://client.thynkculture.com" style="display:inline-flex;align-items:center;gap:4px;border:1.5px solid var(--line);border-radius:999px;padding:7px 14px;font-size:13px">
+      <span class="material-symbols-outlined">open_in_new</span> Client Portal
+     </a>
+     <button class="pri" id="coAddPost"><span class="material-symbols-outlined">add_circle</span> Add Post</button>
+    </div>
+   </div>
+
+   <!-- Client KPI Grid -->
+   <div class="kpi-grid" style="margin:16px 0 6px">
+    <div class="kpi">
+     <span>Total Posts</span>
+     <b>${posts.length}</b>
+    </div>
+    <div class="kpi">
+     <span>Published</span>
+     <b style="color:#2E7D32">${postedCount}</b>
+    </div>
+    <div class="kpi">
+     <span>Pending / Pipeline</span>
+     <b>${inProgressCount}</b>
+     <span style="font-size:11px;color:var(--mute);margin-top:2px;display:block">${readyCount} ready for publishing</span>
+    </div>
+    <div class="kpi">
+     <span>This Month (${now.toLocaleString('default',{month:'short'})})</span>
+     <b>${monthPosts.length}</b>
+     <span style="font-size:11px;color:var(--mute);margin-top:2px;display:block">${monthPosts.filter(p=>p.status==='posted').length} posted</span>
+    </div>
+   </div>
+  </div>
+
+  <!-- Quick Navigation Hub -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:16px 0">
+   <div class="panel" style="margin:0;cursor:pointer;transition:border-color .15s ease" id="cardNavStrategy">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+     <span class="material-symbols-outlined" style="font-size:24px;color:var(--accent)">lightbulb</span>
+     <h3 style="margin:0;font-size:16px">Strategy</h3>
+    </div>
+    <p class="muted" style="font-size:13px;margin:0 0 10px">${(canvas.pillars||[]).length} Content Pillars & Canvas</p>
+    <span style="font-size:12px;font-weight:600;color:var(--accent)">Open Strategy Canvas →</span>
+   </div>
+
+   <div class="panel" style="margin:0;cursor:pointer;transition:border-color .15s ease" id="cardNavCal">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+     <span class="material-symbols-outlined" style="font-size:24px;color:#6A9BCC">calendar_month</span>
+     <h3 style="margin:0;font-size:16px">Calendar</h3>
+    </div>
+    <p class="muted" style="font-size:13px;margin:0 0 10px">Monthly schedule & editorial dates</p>
+    <span style="font-size:12px;font-weight:600;color:#6A9BCC">Open Calendar View →</span>
+   </div>
+
+   <div class="panel" style="margin:0;cursor:pointer;transition:border-color .15s ease" id="cardNavFeed">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+     <span class="material-symbols-outlined" style="font-size:24px;color:#C46686">grid_on</span>
+     <h3 style="margin:0;font-size:16px">Feed</h3>
+    </div>
+    <p class="muted" style="font-size:13px;margin:0 0 10px">3-Column Instagram layout preview</p>
+    <span style="font-size:12px;font-weight:600;color:#C46686">Open Feed Preview →</span>
+   </div>
+
+   <div class="panel" style="margin:0;cursor:pointer;transition:border-color .15s ease" id="cardNavDocs">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+     <span class="material-symbols-outlined" style="font-size:24px;color:#788C5D">folder</span>
+     <h3 style="margin:0;font-size:16px">Docs</h3>
+    </div>
+    <p class="muted" style="font-size:13px;margin:0 0 10px">${(canvas.links||[]).length} Reference links & guides</p>
+    <span style="font-size:12px;font-weight:600;color:#788C5D">Open Documents →</span>
+   </div>
+
+   <div class="panel" style="margin:0;cursor:pointer;transition:border-color .15s ease" id="cardNavReports">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+     <span class="material-symbols-outlined" style="font-size:24px;color:#2E7D32">analytics</span>
+     <h3 style="margin:0;font-size:16px">Reports</h3>
+    </div>
+    <p class="muted" style="font-size:13px;margin:0 0 10px">${pct}% Publishing completion</p>
+    <span style="font-size:12px;font-weight:600;color:#2E7D32">View Performance Reports →</span>
+   </div>
+  </div>
+
+  <!-- Upcoming Schedule Queue -->
+  <div class="panel" style="margin-top:16px">
+   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div>
+     <h3 style="margin:0;font-size:17px">Upcoming Schedule</h3>
+     <p class="muted" style="margin:2px 0 0;font-size:13px">Next posts lined up for publishing</p>
+    </div>
+    <button id="coViewAllList" style="font-size:13px;padding:5px 12px">View all posts (${posts.length}) →</button>
+   </div>
+
+   ${upcomingPosts.length?`
+    <div style="display:flex;flex-direction:column">
+     ${upcomingPosts.map(p=>{
+      const isPosted=p.status==="posted";
+      return `
+       <div class="row">
+        <div>
+         <b>${p.post_date}</b>
+         <div class="muted" style="font-size:11px">${p.type}</div>
+        </div>
+        <div class="d">
+         <span class="tag ${p.type}">${esc(p.pillar)}</span>
+         <span style="margin-left:6px">${esc(p.content||"(No copy written)")}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+         <button class="tick-btn ${isPosted?'ticked':''}" data-cotick="${p.id}" title="${isPosted?'Click to mark as not posted':'Click to verify as posted'}">
+          <span class="material-symbols-outlined" style="font-size:16px">${isPosted?'check_circle':'radio_button_unchecked'}</span>
+          <span>${isPosted?'Posted':'Mark posted'}</span>
+         </button>
+         <button style="font-size:12px;padding:4px 10px" data-coedit="${p.id}">Edit</button>
+        </div>
+       </div>`;
+     }).join("")}
+    </div>
+   `:`
+    <div style="padding:18px 0;text-align:center">
+     <p class="muted" style="margin:0 0 10px">No upcoming posts scheduled.</p>
+     <button class="pri" id="coSchedulePostBtn" style="font-size:13px;padding:6px 14px">
+      <span class="material-symbols-outlined">add_circle</span> Schedule Next Post
+     </button>
+    </div>
+   `}
+  </div>`;
+
+ $("coEditClient").onclick=()=>clientForm(cur);
+ $("coAddPost").onclick=()=>postForm({});
+ if($("coSchedulePostBtn")) $("coSchedulePostBtn").onclick=()=>postForm({});
+ $("coViewAllList").onclick=()=>{adminView="list";updateSubnavActive();renderList()};
+ 
+ $("cardNavStrategy").onclick=()=>{adminView="strategy";updateSubnavActive();renderStrategyView()};
+ $("cardNavCal").onclick=()=>{adminView="cal";updateSubnavActive();renderCalendarView()};
+ $("cardNavFeed").onclick=()=>{adminView="feed";updateSubnavActive();renderFeedView()};
+ $("cardNavDocs").onclick=()=>{adminView="docs";updateSubnavActive();renderDocsView()};
+ $("cardNavReports").onclick=()=>{adminView="reports";updateSubnavActive();renderReportsView()};
+
+ $("contentArea").querySelectorAll("[data-cotick]").forEach(btn=>{
+  btn.onclick=e=>{
+   e.stopPropagation();
+   togglePosted(btn.dataset.cotick);
+  };
+ });
+ $("contentArea").querySelectorAll("[data-coedit]").forEach(btn=>{
+  btn.onclick=e=>{
+   e.stopPropagation();
+   const pid=btn.dataset.coedit;
+   const p=posts.find(x=>x.id===pid);
+   if(p) postForm(p);
+  };
+ });
+}
+
+// 1. List View: Upcoming/Active posts by default + Toggle button to show past posted posts
 function renderList(){
- $("list").innerHTML=posts.length?posts.map(p=>`<div class="row"><b class="d">${p.post_date}</b><div><b>${esc(p.type)}</b> · ${esc(p.pillar)}<div class="muted">${esc(p.content)} · ${p.status}</div></div><div><button data-e="${p.id}">Edit</button> <button class="danger" data-x="${p.id}">Delete</button></div></div>`).join(""):`<p class="muted">No posts yet. Click “Add post”.</p>`;
+ const activePosts=posts.filter(p=>p.status!=="posted");
+ const postedPosts=posts.filter(p=>p.status==="posted");
+
+ $("contentArea").innerHTML=`<div class="panel" id="list">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+   <div>
+    <h2 style="margin:0">${esc(cur.name)} Posts</h2>
+    <p class="muted" style="margin:4px 0 0">${activePosts.length} active scheduled · ${postedPosts.length} already posted</p>
+   </div>
+   ${postedPosts.length?`
+    <button id="togglePastBtn" style="font-size:13px;padding:6px 14px">
+     <span class="material-symbols-outlined" style="font-size:16px">${showPastPosted?'expand_less':'history'}</span>
+     ${showPastPosted?'Hide past posted':'View past posted ('+postedPosts.length+')'}
+    </button>
+   `:""}
+  </div>
+
+  <!-- Active / Upcoming Posts -->
+  ${activePosts.length?activePosts.map(p=>renderPostRow(p,false)).join(""):`<p class="muted">No upcoming posts scheduled. Click “Add post” above to plan new content.</p>`}
+
+  <!-- Past Posted Section (Hidden by default) -->
+  ${postedPosts.length&&showPastPosted?`
+   <div style="margin-top:20px;border-top:1.5px dashed var(--line);padding-top:14px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+     <span class="material-symbols-outlined" style="color:#2E7D32">history</span>
+     <b style="font-size:14px">Past Posted Content (${postedPosts.length})</b>
+    </div>
+    ${postedPosts.map(p=>renderPostRow(p,true)).join("")}
+   </div>
+  `:""}
+ </div>`;
+
+ if($("togglePastBtn")){
+  $("togglePastBtn").onclick=()=>{
+   showPastPosted=!showPastPosted;
+   renderList();
+  };
+ }
+
+ $("list").querySelectorAll("[data-tick]").forEach(b=>b.onclick=()=>togglePosted(b.dataset.tick));
  $("list").querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>postForm(posts.find(p=>p.id===b.dataset.e)));
- $("list").querySelectorAll("[data-x]").forEach(b=>b.onclick=async()=>{if(!confirm("Delete this post?"))return;await sb.from("posts").delete().eq("id",b.dataset.x);loadPosts()})}
+ $("list").querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>confirmDeletePost(b.dataset.x));
+}
+
+function renderPostRow(p,isMuted){
+ const isPosted=p.status==="posted";
+ return `
+  <div class="row" style="${isMuted?'opacity:0.82':''}">
+   <b class="d">${p.post_date}</b>
+   <div>
+    <b>${esc(p.type)}</b> · ${esc(p.pillar)}
+    <div class="muted">${esc(p.content||'—')} · ${p.status}</div>
+   </div>
+   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+    <button class="tick-btn ${isPosted?'ticked':''}" data-tick="${p.id}" title="${isPosted?'Click to mark as not posted':'Click to verify as posted'}">
+     <span class="material-symbols-outlined" style="font-size:16px;color:${isPosted?'#2E7D32':'inherit'}">${isPosted?'check_circle':'radio_button_unchecked'}</span>
+     ${isPosted?'Posted':'Mark posted'}
+    </button>
+    <button data-e="${p.id}"><span class="material-symbols-outlined" style="font-size:15px">edit</span> Edit</button>
+    <button class="danger" data-x="${p.id}"><span class="material-symbols-outlined" style="font-size:15px">delete</span> Delete</button>
+   </div>
+  </div>`;
+}
+
+// 2. Calendar View
+function renderCalendarView(){
+ const MN=["January","February","March","April","May","June","July","August","September","October","November","December"];
+ const DN=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+ const KINDS={Poster:"Poster",Reel:"Reel",Collab:"Collab",Spl:"Special day"};
+ const CV={Poster:["--poster","--posterbg"],Reel:["--reel","--reelbg"],Collab:["--collab","--collabbg"],Spl:["--spl","--splbg"]};
+ const kind=p=>p.pillar==="Spl Day"?"Spl":p.pillar==="Collab"?"Collab":p.type;
+
+ const byDate={};
+ posts.forEach(p=>{
+  if(!byDate[p.post_date])byDate[p.post_date]=[];
+  byDate[p.post_date].push({...p,k:kind(p)});
+ });
+
+ const firstDay=new Date(adminCalY,adminCalM,1).getDay();
+ const daysInMonth=new Date(adminCalY,adminCalM+1,0).getDate();
+
+ let gridHtml="";
+ for(let i=0;i<firstDay;i++)gridHtml+=`<div class="day empty"></div>`;
+ for(let d=1;d<=daysInMonth;d++){
+  const key=`${adminCalY}-${pad(adminCalM+1)}-${pad(d)}`;
+  const dayPosts=byDate[key]||[];
+  const filteredPosts=dayPosts.filter(p=>adminCalFilter==="All"||p.k===adminCalFilter);
+
+  let chipsHtml="";
+  filteredPosts.slice(0,3).forEach(p=>{
+   const isPosted=p.status==="posted";
+   chipsHtml+=`<span class="chip ${p.k}"><b>${esc(p.type)}${isPosted?' ✓':(p.status==='ready'?' ★':'')}</b><i>${esc(p.pillar)}</i></span>`;
+  });
+  if(filteredPosts.length>3){
+   chipsHtml+=`<span style="font-size:10px;color:var(--mute)">+${filteredPosts.length-3} more</span>`;
+  }
+
+  gridHtml+=`<button class="day${key===TODAY?' today':''}${key===adminCalSel?' sel':''}" data-d="${key}" aria-label="${d}">
+   <span class="n">${d}</span>
+   ${chipsHtml}
+  </button>`;
+ }
+
+ const [yy,mm,dd]=adminCalSel.split("-").map(Number);
+ const dt=new Date(yy,mm-1,dd);
+ const title=`${DN[dt.getDay()]}, ${dd} ${MN[mm-1]} ${yy}`;
+ const selPosts=byDate[adminCalSel]||[];
+
+ $("contentArea").innerHTML=`
+  <div class="panel">
+   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+    <div>
+     <h2 style="margin:0">${esc(cur.name)} · Calendar</h2>
+     <p class="muted" style="margin:2px 0 0">Interactive visual calendar view</p>
+    </div>
+   </div>
+
+   <div class="bar" id="adminFilters" role="group">
+    ${["All",...Object.keys(KINDS)].map(k=>`
+     <button class="${adminCalFilter===k?'on':''}" data-k="${k}">${k==="All"?"All":`<span class="dot" style="background:var(${CV[k][0]})"></span>${KINDS[k]}`}</button>
+    `).join("")}
+   </div>
+
+   <div class="bar">
+    <button id="adminPrev"><span class="material-symbols-outlined">chevron_left</span> Prev</button>
+    <div class="month">${MN[adminCalM]} ${adminCalY}</div>
+    <button id="adminNext">Next <span class="material-symbols-outlined">chevron_right</span></button>
+    <span class="sp"></span>
+    <button id="adminToday"><span class="material-symbols-outlined">today</span> Jump to today</button>
+   </div>
+
+   <div class="grid">${DN.map(d=>`<div class="dow">${d}</div>`).join("")}</div>
+   <div class="grid" style="margin-top:6px">${gridHtml}</div>
+
+   <div class="panel" style="margin-top:16px;background:var(--head)">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+     <h3 style="margin:0">${title}</h3>
+     <button style="font-size:13px;padding:5px 12px" id="addDayPost"><span class="material-symbols-outlined">add</span> Add post for this day</button>
+    </div>
+    ${selPosts.length?`
+     <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
+      ${selPosts.map(p=>{
+       const c=CV[p.k];
+       const isPosted=p.status==="posted";
+       const refLink=/^https?:\/\//.test(p.ref_link||"")?`<a href="${esc(p.ref_link)}" target="_blank" rel="noopener">Instagram Link</a>`:"None added";
+       return `
+        <div class="row" style="background:var(--card);padding:12px;border-radius:10px;border:1px solid var(--line)">
+         <div style="display:flex;flex-direction:column;gap:4px">
+          <span class="tag" style="background:var(${c[1]});border:1.5px solid var(${c[0]});width:fit-content">${esc(p.type)}</span>
+          <span class="muted" style="font-size:12px">Pillar: <b>${esc(p.pillar)}</b></span>
+         </div>
+         <div>
+          <b>${esc(p.content||"No description")}</b>
+          <div class="muted" style="font-size:12px;margin-top:2px">Ref: ${refLink}</div>
+         </div>
+         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+          <button class="tick-btn ${isPosted?'ticked':''}" data-tick="${p.id}" title="${isPosted?'Click to mark as not posted':'Click to verify as posted'}">
+           <span class="material-symbols-outlined" style="font-size:16px;color:${isPosted?'#2E7D32':'inherit'}">${isPosted?'check_circle':'radio_button_unchecked'}</span>
+           ${isPosted?'Posted':'Mark posted'}
+          </button>
+          <button data-e="${p.id}"><span class="material-symbols-outlined" style="font-size:15px">edit</span> Edit</button>
+          <button class="danger" data-x="${p.id}"><span class="material-symbols-outlined" style="font-size:15px">delete</span> Delete</button>
+         </div>
+        </div>`;
+      }).join("")}
+     </div>
+    `:`<p class="muted" style="margin:12px 0 0">No posts scheduled for this day.</p>`}
+   </div>
+  </div>`;
+
+ $("addDayPost").onclick=()=>postForm({post_date:adminCalSel});
+
+ $("adminFilters").querySelectorAll("button").forEach(b=>{
+  b.onclick=()=>{adminCalFilter=b.dataset.k;renderCalendarView()};
+ });
+
+ $("adminPrev").onclick=()=>{
+  adminCalM--;
+  if(adminCalM<0){adminCalM=11;adminCalY--}
+  renderCalendarView();
+ };
+ $("adminNext").onclick=()=>{
+  adminCalM++;
+  if(adminCalM>11){adminCalM=0;adminCalY++}
+  renderCalendarView();
+ };
+ $("adminToday").onclick=()=>{
+  adminCalY=now.getFullYear();
+  adminCalM=now.getMonth();
+  adminCalSel=TODAY;
+  renderCalendarView();
+ };
+
+ $("contentArea").querySelectorAll("button.day").forEach(b=>{
+  b.onclick=()=>{adminCalSel=b.dataset.d;renderCalendarView()};
+ });
+ $("contentArea").querySelectorAll("[data-tick]").forEach(b=>{
+  b.onclick=()=>togglePosted(b.dataset.tick);
+ });
+ $("contentArea").querySelectorAll("[data-e]").forEach(b=>{
+  b.onclick=()=>postForm(posts.find(p=>p.id===b.dataset.e));
+ });
+ $("contentArea").querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>confirmDeletePost(b.dataset.x));
+}
+
+// 3. Instagram 3-Column Feed Preview View
+function renderFeedView(){
+ const canvas=getClientCanvas(cur);
+ const sortedPosts=[...posts].sort((a,b)=>b.post_date.localeCompare(a.post_date));
+
+ $("contentArea").innerHTML=`
+  <div class="panel">
+   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+    <div>
+     <h2 style="margin:0">${esc(cur.name)} · Instagram Feed Preview</h2>
+     <p class="muted" style="margin:2px 0 0">Realistic 3-column feed showing how posts appear on Instagram</p>
+    </div>
+    <button class="pri" id="addFeedPost"><span class="material-symbols-outlined">add_circle</span> Add post</button>
+   </div>
+
+   <div class="insta-feed-wrap">
+    <!-- Instagram Profile Header -->
+    <div class="insta-profile-header">
+     ${cur.logo_url?`
+      <img src="${esc(cur.logo_url)}" style="width:68px;height:68px;border-radius:50%;object-fit:cover;border:1.5px solid var(--line)">
+     `:`
+      <div style="width:68px;height:68px;border-radius:50%;background:${cur.accent_color||'#D97757'};color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700">
+       ${esc(cur.name.charAt(0).toUpperCase())}
+      </div>
+     `}
+     <div style="flex:1">
+      <div style="display:flex;align-items:center;gap:6px">
+       <b style="font-size:17px">${esc(cur.username||cur.slug||'brand')}</b>
+       <span class="material-symbols-outlined" style="font-size:16px;color:#1877F2">verified</span>
+      </div>
+      <div style="display:flex;gap:14px;font-size:13px;margin:8px 0">
+       <div><b>${posts.length}</b> posts</div>
+       <div><b>${posts.filter(p=>p.status==='posted').length}</b> posted</div>
+       <div><b>${posts.filter(p=>p.type==='Reel').length}</b> reels</div>
+      </div>
+      <div style="font-size:13px;font-weight:600">${esc(cur.name)}</div>
+      <div class="muted" style="font-size:12px">${esc((canvas.pillars||[]).slice(0,3).join(" • "))}</div>
+     </div>
+    </div>
+
+    <!-- 3-Column Grid -->
+    ${sortedPosts.length?`
+     <div class="insta-grid">
+      ${sortedPosts.map(p=>{
+       const isPosted=p.status==="posted";
+       const isReel=p.type==="Reel";
+       return `
+        <div class="insta-cell" data-feedpid="${p.id}" style="${!p.image_url?`background:linear-gradient(135deg, ${cur.accent_color||'#333'}cc, #141413);`:''}">
+         ${p.image_url?`
+          <img src="${esc(p.image_url)}" alt="${esc(p.pillar)}" loading="lazy" decoding="async">
+         `:`
+          <div style="padding:10px;font-size:11px;z-index:1">
+           <span class="tag" style="background:#ffffff22;color:#fff;border:1px solid #ffffff44;font-size:10px;padding:1px 6px;margin-bottom:6px;display:inline-block">${esc(p.type)}</span>
+           <div style="font-weight:700;line-height:1.2;font-size:12px">${esc(p.pillar)}</div>
+           <div style="opacity:0.8;font-size:10px;margin-top:4px">${p.post_date}</div>
+          </div>
+         `}
+         ${isReel?`<span class="insta-type-icon"><span class="material-symbols-outlined" style="font-size:18px">movie</span></span>`:''}
+         ${isPosted?`<span class="insta-posted-icon"><span class="material-symbols-outlined" style="font-size:16px">check_circle</span></span>`:''}
+         <div class="insta-cell-overlay">
+          <b style="font-size:12px;line-height:1.2">${esc(p.type)} · ${esc(p.pillar)}</b>
+          <span style="font-size:11px;opacity:0.9">${p.post_date}</span>
+          <span style="font-size:11px;color:#A5D6A7">${isPosted?'✓ Final posted':p.status}</span>
+          <button style="font-size:11px;padding:3px 10px;border-radius:999px;margin-top:4px">Edit</button>
+         </div>
+        </div>`;
+      }).join("")}
+     </div>
+    `:`
+     <p class="muted" style="text-align:center;padding:30px 0">No posts planned yet. Click "Add post" to preview your Instagram grid.</p>
+    `}
+   </div>
+  </div>`;
+
+ $("addFeedPost").onclick=()=>postForm({});
+ $("contentArea").querySelectorAll("[data-feedpid]").forEach(cell=>{
+  cell.onclick=()=>{
+   const pid=cell.dataset.feedpid;
+   const found=posts.find(p=>p.id===pid);
+   if(found) postForm(found);
+  };
+ });
+}
+
+// 4. Client Canvas / Content Hub & Docs (White Theme with Dark Font + Print PDF)
+function getClientCanvas(c){
+ if(c.canvas&&typeof c.canvas==="object")return c.canvas;
+ try{
+  const cached=JSON.parse(localStorage.getItem("tc_canvas_"+c.id));
+  if(cached)return cached;
+ }catch(e){}
+ return {
+  pillars:["Menu","Authenticity","Reels Concept","Collab","Special Day","Behind The Scenes"],
+  links:[
+   {name:"Brand Guidelines",url:"https://drive.google.com"},
+   {name:"Instagram Inspiration Board",url:"https://instagram.com"}
+  ],
+  notes:"# Content Strategy & Brand Canvas\n\n### Tone of Voice\n- Friendly, engaging, visually authentic\n\n### Key Content Objectives\n- Drive foot traffic\n- Showcase signature items\n- Highlight behind-the-scenes craft"
+ };
+}
+
+function parseMarkdown(md){
+ if(!md)return '<p class="muted">No canvas notes added yet.</p>';
+ return esc(md)
+  .replace(/^### (.*$)/gim,'<h4 style="margin:12px 0 4px">$1</h4>')
+  .replace(/^## (.*$)/gim,'<h3 style="margin:14px 0 6px">$1</h3>')
+  .replace(/^# (.*$)/gim,'<h2 style="margin:16px 0 8px">$1</h2>')
+  .replace(/^\> (.*$)/gim,'<blockquote>$1</blockquote>')
+  .replace(/\*\*(.*?)\*\*/gim,'<b>$1</b>')
+  .replace(/\*(.*?)\*/gim,'<i>$1</i>')
+  .replace(/\[(.*?)\]\((.*?)\)/gim,'<a href="$2" target="_blank" rel="noopener">$1</a>')
+  .replace(/^\- (.*$)/gim,'• $1<br>')
+  .replace(/\n/gim,'<br>');
+}
+
+// 4. Content Strategy View (Strategy Canvas & Content Pillars)
+function renderStrategyView(){
+ const canvas=getClientCanvas(cur);
+ cur.canvas=canvas;
+
+ $("contentArea").innerHTML=`
+  <div class="panel">
+   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+    <div>
+     <h2 style="margin:0">${esc(cur.name)} · Content Strategy</h2>
+     <p class="muted" style="margin:2px 0 0">Brand guidelines, tone of voice, content pillars & strategy notes</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+     <button id="printCanvasBtn"><span class="material-symbols-outlined">print</span> Print PDF</button>
+     <input type="file" id="importMdFile" accept=".md,.txt,.markdown" style="display:none">
+     <button id="importMdBtn"><span class="material-symbols-outlined">upload_file</span> Import .md</button>
+     <button class="pri" id="saveStrategyBtn"><span class="material-symbols-outlined">save</span> Save Strategy</button>
+    </div>
+   </div>
+
+   <p id="strategyMsg" class="msg" style="color:var(--poster);font-weight:600;min-height:18px"></p>
+
+   <!-- Content Pillars Card -->
+   <div class="canvas-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+     <h3 style="margin:0;font-size:16px"><span class="material-symbols-outlined">category</span> Content Pillars</h3>
+     <span class="muted" style="font-size:12px">Pillars auto-suggest in post forms</span>
+    </div>
+    <div id="pillarChips" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+     ${(canvas.pillars||[]).map((p,i)=>`
+      <span class="canvas-pill">
+       <b>${esc(p)}</b>
+       <button data-delp="${i}" title="Remove pillar">×</button>
+      </span>
+     `).join("")}
+    </div>
+    <div style="display:flex;gap:8px;max-width:380px">
+     <input id="newPillarInput" placeholder="Add new content pillar…" style="padding:6px 10px;font-size:13px">
+     <button id="addPillarBtn" style="white-space:nowrap;padding:6px 12px;font-size:13px">+ Add</button>
+    </div>
+   </div>
+
+   <!-- Strategy Notes / Markdown Canvas (WHITE THEME WITH DARK FONT, PREVIEW BY DEFAULT) -->
+   <div class="canvas-card" style="background:transparent;border:0;padding:0">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+     <h3 style="margin:0;font-size:16px"><span class="material-symbols-outlined">edit_note</span> Content Strategy Canvas (Markdown)</h3>
+     <div style="display:flex;gap:6px">
+      <button id="tabMdPrev" class="on" style="padding:4px 12px;font-size:12px"><span class="material-symbols-outlined" style="font-size:15px">visibility</span> Preview</button>
+      <button id="tabMdEdit" style="padding:4px 12px;font-size:12px"><span class="material-symbols-outlined" style="font-size:15px">edit</span> Edit</button>
+     </div>
+    </div>
+    <!-- White Paper Theme with Dark Font -->
+    <div id="mdPrevView" class="white-canvas-doc" style="display:block">
+     ${parseMarkdown(canvas.notes||"")}
+    </div>
+    <div id="mdEditView" style="display:none">
+     <textarea id="canvasNotesInput" rows="16" class="white-canvas-input">${esc(canvas.notes||"")}</textarea>
+    </div>
+   </div>
+  </div>`;
+
+ // Pillars handling
+ $("addPillarBtn").onclick=()=>{
+  const val=$("newPillarInput").value.trim();
+  if(!val)return;
+  canvas.pillars.push(val);
+  renderStrategyView();
+ };
+ $("pillarChips").querySelectorAll("[data-delp]").forEach(b=>{
+  b.onclick=()=>{
+   const idx=+b.dataset.delp;
+   canvas.pillars.splice(idx,1);
+   renderStrategyView();
+  };
+ });
+
+ // Markdown view toggle (Preview by default)
+ $("tabMdPrev").onclick=()=>{
+  if($("canvasNotesInput")) canvas.notes=$("canvasNotesInput").value;
+  $("tabMdPrev").classList.add("on");$("tabMdEdit").classList.remove("on");
+  $("mdEditView").style.display="none";$("mdPrevView").style.display="block";
+  $("mdPrevView").innerHTML=parseMarkdown(canvas.notes);
+ };
+ $("tabMdEdit").onclick=()=>{
+  $("tabMdEdit").classList.add("on");$("tabMdPrev").classList.remove("on");
+  $("mdPrevView").style.display="none";$("mdEditView").style.display="block";
+  $("canvasNotesInput").focus();
+ };
+
+ // Import .md file
+ $("importMdBtn").onclick=()=>$("importMdFile").click();
+ $("importMdFile").onchange=e=>{
+  const f=e.target.files[0];
+  if(!f)return;
+  const reader=new FileReader();
+  reader.onload=re=>{
+   canvas.notes=re.target.result;
+   if($("canvasNotesInput")) $("canvasNotesInput").value=canvas.notes;
+   $("mdPrevView").innerHTML=parseMarkdown(canvas.notes);
+   saveStrategy();
+  };
+  reader.readAsText(f);
+ };
+
+ // Print PDF of Strategy
+ $("printCanvasBtn").onclick=()=>{
+  if($("canvasNotesInput")) canvas.notes=$("canvasNotesInput").value;
+  window.print();
+ };
+
+ $("saveStrategyBtn").onclick=saveStrategy;
+
+ async function saveStrategy(){
+  if(!cur||!cur.id||cur.id==="undefined")return;
+  if($("canvasNotesInput")) canvas.notes=$("canvasNotesInput").value;
+  $("strategyMsg").textContent="Saving strategy…";
+  localStorage.setItem("tc_canvas_"+cur.id,JSON.stringify(canvas));
+  try{
+   const {error}=await sb.from("clients").update({canvas}).eq("id",cur.id);
+   if(error){
+    $("strategyMsg").textContent="✓ Saved locally! (Run supabase-setup.sql to sync in cloud)";
+   }else{
+    $("strategyMsg").textContent="✓ Strategy saved successfully!";
+   }
+   setTimeout(()=>{if($("strategyMsg"))$("strategyMsg").textContent=""},3000);
+  }catch(err){
+   $("strategyMsg").textContent="✓ Saved locally!";
+  }
+ }
+}
+
+// 5. Documents & Brand Assets View (Docs)
+function renderDocsView(){
+ const canvas=getClientCanvas(cur);
+ cur.canvas=canvas;
+
+ $("contentArea").innerHTML=`
+  <div class="panel">
+   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+    <div>
+     <h2 style="margin:0">${esc(cur.name)} · Documents & Resources</h2>
+     <p class="muted" style="margin:2px 0 0">Brand guides, drive folders, design assets & reference links</p>
+    </div>
+    <button class="pri" id="saveDocsBtn"><span class="material-symbols-outlined">save</span> Save Library</button>
+   </div>
+
+   <p id="docsMsg" class="msg" style="color:var(--poster);font-weight:600;min-height:18px"></p>
+
+   <div class="canvas-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+     <h3 style="margin:0;font-size:16px"><span class="material-symbols-outlined">folder_open</span> Client Document Library (${(canvas.links||[]).length})</h3>
+     <span class="muted" style="font-size:12px">Centralized assets for brand & team</span>
+    </div>
+    <div id="docList" style="margin-bottom:16px">
+     ${(canvas.links||[]).length?(canvas.links||[]).map((lnk,i)=>`
+      <div class="doc-link">
+       <a href="${esc(lnk.url)}" target="_blank" rel="noopener">
+        <span class="material-symbols-outlined" style="font-size:18px">description</span>
+        <span style="font-weight:600">${esc(lnk.name)}</span>
+        <span class="muted" style="font-size:12px">(${esc(lnk.url)})</span>
+       </a>
+       <button class="danger" data-dellnk="${i}" style="border:0;background:transparent;cursor:pointer;padding:4px" title="Delete link">
+        <span class="material-symbols-outlined" style="font-size:17px">delete</span>
+       </button>
+      </div>
+     `).join(""):`<p class="muted" style="font-size:13px;padding:8px 0">No documents or links added yet. Add your first link below.</p>`}
+    </div>
+    <div style="background:var(--head);padding:14px 16px;border-radius:12px;border:1px solid var(--line)">
+     <h4 style="margin:0 0 10px;font-size:14px">Add Document or Reference Link</h4>
+     <div class="two" style="max-width:640px;align-items:flex-end">
+      <div><label style="margin:0 0 3px;font-size:12px">Doc / Link Name</label><input id="newDocName" placeholder="e.g. Brand Guidelines PDF, Google Drive Folder" style="padding:7px 11px;font-size:13px"></div>
+      <div><label style="margin:0 0 3px;font-size:12px">URL</label><input id="newDocUrl" placeholder="https://..." style="padding:7px 11px;font-size:13px"></div>
+     </div>
+     <button id="addDocBtn" style="margin-top:10px;padding:6px 14px;font-size:13px">+ Add to Library</button>
+    </div>
+   </div>
+  </div>`;
+
+ $("addDocBtn").onclick=()=>{
+  const name=$("newDocName").value.trim(),url=$("newDocUrl").value.trim();
+  if(!name||!url)return;
+  canvas.links.push({name,url});
+  saveDocs();
+  renderDocsView();
+ };
+ $("docList").querySelectorAll("[data-dellnk]").forEach(b=>{
+  b.onclick=()=>{
+   const idx=+b.dataset.dellnk;
+   canvas.links.splice(idx,1);
+   saveDocs();
+   renderDocsView();
+  };
+ });
+ $("saveDocsBtn").onclick=saveDocs;
+
+ async function saveDocs(){
+  if(!cur||!cur.id||cur.id==="undefined")return;
+  $("docsMsg").textContent="Saving library…";
+  localStorage.setItem("tc_canvas_"+cur.id,JSON.stringify(canvas));
+  try{
+   const {error}=await sb.from("clients").update({canvas}).eq("id",cur.id);
+   if(error){
+    $("docsMsg").textContent="✓ Saved locally!";
+   }else{
+    $("docsMsg").textContent="✓ Library saved successfully!";
+   }
+   setTimeout(()=>{if($("docsMsg"))$("docsMsg").textContent=""},3000);
+  }catch(err){
+   $("docsMsg").textContent="✓ Saved locally!";
+  }
+ }
+}
+
+// 6. Content Performance & Publishing Reports View
+function renderReportsView(){
+ const postedPosts=posts.filter(p=>p.status==="posted");
+ const total=posts.length;
+ const completionRate=total?Math.round((postedPosts.length/total)*100):0;
+ 
+ const reelsCount=posts.filter(p=>p.type==="Reel").length;
+ const postersCount=posts.filter(p=>p.type==="Poster").length;
+ const reelPct=total?Math.round((reelsCount/total)*100):0;
+ const posterPct=total?Math.round((postersCount/total)*100):0;
+
+ const pillarCounts={};
+ posts.forEach(p=>{
+  const pil=p.pillar||"Unassigned";
+  pillarCounts[pil]=(pillarCounts[pil]||0)+1;
+ });
+ const sortedPillars=Object.entries(pillarCounts).sort((a,b)=>b[1]-a[1]);
+
+ const monthCounts={};
+ posts.forEach(p=>{
+  if(!p.post_date)return;
+  const ym=p.post_date.slice(0,7);
+  monthCounts[ym]=(monthCounts[ym]||{total:0,posted:0});
+  monthCounts[ym].total++;
+  if(p.status==="posted") monthCounts[ym].posted++;
+ });
+ const sortedMonths=Object.keys(monthCounts).sort();
+
+ $("contentArea").innerHTML=`
+  <div class="panel">
+   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+    <div>
+     <h2 style="margin:0">${esc(cur.name)} · Content Performance & Publishing Report</h2>
+     <p class="muted" style="margin:2px 0 0">Publishing cadence, content mix distribution & pillar coverage</p>
+    </div>
+    <button id="printReportBtn"><span class="material-symbols-outlined">print</span> Print Report</button>
+   </div>
+
+   <!-- Report Summary KPI Cards -->
+   <div class="kpi-grid" style="margin:16px 0">
+    <div class="kpi">
+     <span>Overall Publishing Rate</span>
+     <b style="color:#2E7D32">${completionRate}%</b>
+     <span style="font-size:11px;color:var(--mute);margin-top:2px;display:block">${postedPosts.length} of ${total} posts published</span>
+    </div>
+    <div class="kpi">
+     <span>Reels Scheduled</span>
+     <b style="color:#6A9BCC">${reelsCount}</b>
+     <span style="font-size:11px;color:var(--mute);margin-top:2px;display:block">${reelPct}% of total content</span>
+    </div>
+    <div class="kpi">
+     <span>Static Posters</span>
+     <b style="color:#D97757">${postersCount}</b>
+     <span style="font-size:11px;color:var(--mute);margin-top:2px;display:block">${posterPct}% of total content</span>
+    </div>
+    <div class="kpi">
+     <span>Active Pillars</span>
+     <b>${sortedPillars.length}</b>
+     <span style="font-size:11px;color:var(--mute);margin-top:2px;display:block">Across all scheduled campaigns</span>
+    </div>
+   </div>
+
+   <!-- Progress Visual Bar -->
+   <div class="canvas-card">
+    <h3 style="margin:0 0 8px;font-size:16px">Publishing Completion Progress</h3>
+    <div style="height:14px;background:var(--head);border-radius:999px;overflow:hidden;border:1px solid var(--line);margin:10px 0 6px">
+     <div style="height:100%;background:#2E7D32;width:${completionRate}%;transition:width .4s ease"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--mute)">
+     <span>0%</span>
+     <span><b>${completionRate}% Completed</b> (${postedPosts.length}/${total})</span>
+     <span>100%</span>
+    </div>
+   </div>
+
+   <!-- Content Type & Pillar Mix -->
+   <div class="two" style="margin-top:14px">
+    <div class="canvas-card" style="margin:0">
+     <h3 style="margin:0 0 10px;font-size:16px">Content Format Mix</h3>
+     <div style="display:flex;flex-direction:column;gap:8px">
+      <div>
+       <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px">
+        <span>🎬 Reels</span>
+        <b>${reelsCount} (${reelPct}%)</b>
+       </div>
+       <div style="height:8px;background:var(--head);border-radius:999px;overflow:hidden">
+        <div style="height:100%;background:var(--reel);width:${reelPct}%"></div>
+       </div>
+      </div>
+      <div>
+       <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px">
+        <span>🖼️ Posters</span>
+        <b>${postersCount} (${posterPct}%)</b>
+       </div>
+       <div style="height:8px;background:var(--head);border-radius:999px;overflow:hidden">
+        <div style="height:100%;background:var(--poster);width:${posterPct}%"></div>
+       </div>
+      </div>
+     </div>
+    </div>
+
+    <div class="canvas-card" style="margin:0">
+     <h3 style="margin:0 0 10px;font-size:16px">Pillar Distribution</h3>
+     <div style="display:flex;flex-direction:column;gap:8px">
+      ${sortedPillars.map(([pil,cnt])=>{
+       const pPct=total?Math.round((cnt/total)*100):0;
+       return `
+        <div>
+         <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px">
+          <span>${esc(pil)}</span>
+          <b>${cnt} (${pPct}%)</b>
+         </div>
+         <div style="height:8px;background:var(--head);border-radius:999px;overflow:hidden">
+          <div style="height:100%;background:var(--sel);width:${pPct}%"></div>
+         </div>
+        </div>`;
+      }).join("")}
+     </div>
+    </div>
+   </div>
+
+   <!-- Monthly Cadence Breakdown -->
+   <div class="canvas-card" style="margin-top:14px">
+    <h3 style="margin:0 0 10px;font-size:16px">Monthly Publishing Cadence</h3>
+    ${sortedMonths.length?`
+     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">
+      ${sortedMonths.map(ym=>{
+       const mData=monthCounts[ym];
+       const dateObj=new Date(ym+"-01T00:00:00");
+       const mName=dateObj.toLocaleString('default',{month:'short',year:'numeric'});
+       const mPct=mData.total?Math.round((mData.posted/mData.total)*100):0;
+       return `
+        <div style="background:var(--head);border:1px solid var(--line);border-radius:10px;padding:10px 12px">
+         <span style="font-weight:600;font-size:13px;display:block">${mName}</span>
+         <b style="font-size:18px;display:block;margin:4px 0">${mData.total} posts</b>
+         <span style="font-size:11px;color:#2E7D32">${mData.posted} posted (${mPct}%)</span>
+        </div>`;
+      }).join("")}
+     </div>
+    `:`<p class="muted" style="font-size:13px">No scheduled posts to report.</p>`}
+   </div>
+  </div>`;
+
+ $("printReportBtn").onclick=()=>window.print();
+}
+
+// Client Form Popup Modal
 function clientForm(c){
- $("form").innerHTML=`<div class="panel"><h2>${c?"Edit client":"New client"}</h2><div class="two"><div><label>Name</label><input id="cn" value="${esc(c?.name)}"></div><div><label>Slug (subdomain)</label><input id="cg" value="${esc(c?.slug)}" placeholder="zahran"></div></div><label>Brand colour</label><input id="cc" type="color" value="${c?.accent_color||"#D97757"}" style="max-width:90px;padding:3px"><p class="msg" id="msg"></p><div class="bar"><button class="pri" id="sv">Save client</button><button id="cx">Cancel</button></div></div>`;
- $("cx").onclick=()=>$("form").innerHTML="";
- $("sv").onclick=async()=>{const name=$("cn").value.trim(),slug=slugify($("cg").value||name);if(!name||!slug){$("msg").textContent="Enter a name.";return}
-  const row={name,slug,accent_color:$("cc").value};
-  const {data,error}=c?await sb.from("clients").update(row).eq("id",c.id).select().single():await sb.from("clients").insert(row).select().single();
-  if(error){$("msg").textContent=error.message;return}cur=data;await home()}}
+ let clientLogoUrl=c?.logo_url||localStorage.getItem("tc_logo_"+(c?.id||""))||"";
+
+ const html=`
+  <div class="modal-header-row">
+   <h2 style="margin:0">${c?"Edit client":"New client"}</h2>
+   <button class="modal-close-btn" id="closeFormModal" type="button">
+    <span class="material-symbols-outlined">close</span>
+   </button>
+  </div>
+  <div>
+   <label>Client Name</label>
+   <input id="cn" value="${esc(c?.name)}" placeholder="e.g. Zahran Cafe & Restaurant" autofocus>
+  </div>
+
+  <!-- Client Square Logo Avatar Setting (1:1 Ratio, max 2MB) -->
+  <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px">
+   <label style="font-size:13px;font-weight:600;margin-top:0">Client Logo (Square 1:1)</label>
+   <div style="display:flex;align-items:center;gap:14px;margin-top:8px">
+    <div id="logoPreviewBox" style="width:58px;height:58px;border-radius:12px;border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--head);flex-shrink:0">
+     ${clientLogoUrl?`
+      <img src="${esc(clientLogoUrl)}" style="width:100%;height:100%;object-fit:cover">
+     `:`
+      <span class="material-symbols-outlined" style="color:var(--mute);font-size:24px">image</span>
+     `}
+    </div>
+    <div style="flex:1">
+     <input type="file" id="logoFileInput" accept="image/png,image/jpeg,image/webp" style="display:none">
+     <button type="button" id="uploadLogoBtn" style="font-size:12px;padding:6px 12px">
+      <span class="material-symbols-outlined" style="font-size:16px">upload</span> ${clientLogoUrl?'Change Logo':'Upload Square Logo'}
+     </button>
+     ${clientLogoUrl?`
+      <button type="button" id="removeLogoBtn" style="font-size:12px;padding:6px 10px;margin-left:6px;color:var(--bad)">Remove</button>
+     `:""}
+     <p class="muted" style="margin:4px 0 0;font-size:11px">Square 1:1 ratio, max 2MB. Automatically fitted for dashboard & profile.</p>
+    </div>
+   </div>
+  </div>
+
+  <div style="margin-top:14px">
+   <label>Brand colour</label>
+   <input id="cc" type="color" value="${c?.accent_color||"#D97757"}" style="max-width:90px;padding:3px">
+  </div>
+
+  <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px">
+   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+    <b style="font-size:14px">Client Portal Authentication</b>
+    <span class="muted" style="font-size:12px">2-step verification</span>
+   </div>
+   <div class="two">
+    <div>
+     <label>Username</label>
+     <input id="cu" value="${esc(c?.username||"")}" placeholder="e.g. zahran" autocomplete="off">
+     <div id="cuHint" style="font-size:12px;margin-top:3px;min-height:16px"></div>
+    </div>
+    <div>
+     <label>Password ${c?'<span class="muted">(leave blank to keep current)</span>':''}</label>
+     <div style="position:relative">
+      <input id="cp" type="password" placeholder="${c?'••••••••':'Set password'}" autocomplete="new-password" style="padding-right:34px">
+      <button type="button" id="togglePwVis" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:transparent;padding:4px;cursor:pointer;color:var(--mute);display:flex" title="Show/Hide password">
+       <span class="material-symbols-outlined" style="font-size:18px">visibility</span>
+      </button>
+     </div>
+     <div id="cpHint" style="font-size:12px;margin-top:3px;min-height:16px"></div>
+    </div>
+   </div>
+   <div style="margin-top:4px">
+    <label>Confirm Password ${c?'<span class="muted">(re-type to verify)</span>':''}</label>
+    <input id="cpc" type="password" placeholder="${c?'••••••••':'Re-enter password to confirm'}" autocomplete="new-password">
+    <div id="cpcHint" style="font-size:12px;margin-top:3px;min-height:16px"></div>
+   </div>
+  </div>
+
+  <p class="msg" id="msg"></p>
+  <div class="bar">
+   <button class="pri" id="sv"><span class="material-symbols-outlined">save</span> Save client</button>
+   <button id="cx" type="button">Cancel</button>
+   ${c?`
+    <span class="sp"></span>
+    <button class="danger" id="delcForm" type="button"><span class="material-symbols-outlined">delete</span> Delete client</button>
+   `:""}
+  </div>`;
+
+ openModal(html);
+ $("closeFormModal").onclick=closeModal;
+ $("cx").onclick=closeModal;
+ if(c){
+  $("delcForm").onclick=()=>{closeModal();confirmDeleteClient(c)};
+ }
+
+ // Square Logo Upload & 1:1 Aspect Fit
+ $("uploadLogoBtn").onclick=()=>$("logoFileInput").click();
+ if($("removeLogoBtn")){
+  $("removeLogoBtn").onclick=()=>{
+   clientLogoUrl="";
+   $("logoPreviewBox").innerHTML=`<span class="material-symbols-outlined" style="color:var(--mute);font-size:24px">image</span>`;
+   $("removeLogoBtn").style.display="none";
+  };
+ }
+ $("logoFileInput").onchange=e=>{
+  const file=e.target.files[0];
+  if(!file)return;
+  if(file.size>2*1024*1024){
+   $("msg").textContent="Logo image exceeds 2MB limit. Please choose a smaller file.";
+   return;
+  }
+  $("msg").textContent="Processing square image…";
+  const reader=new FileReader();
+  reader.onload=re=>{
+   const img=new Image();
+   img.onload=()=>{
+    const canvas=document.createElement("canvas");
+    const targetSize=300;
+    canvas.width=targetSize;
+    canvas.height=targetSize;
+    const ctx=canvas.getContext("2d");
+    const minDim=Math.min(img.width,img.height);
+    const sx=(img.width-minDim)/2;
+    const sy=(img.height-minDim)/2;
+    ctx.drawImage(img,sx,sy,minDim,minDim,0,0,targetSize,targetSize);
+
+    clientLogoUrl=canvas.toDataURL("image/webp",0.9);
+    $("logoPreviewBox").innerHTML=`<img src="${clientLogoUrl}" style="width:100%;height:100%;object-fit:cover">`;
+    $("msg").textContent="";
+   };
+   img.src=re.target.result;
+  };
+  reader.readAsDataURL(file);
+ };
+
+ const validateAuthLive=()=>{
+  const un=$("cu")?$("cu").value.trim():"";
+  const pw=$("cp")?$("cp").value:"";
+  const cpw=$("cpc")?$("cpc").value:"";
+
+  let isValid=true;
+
+  // Username validation
+  if(pw.length>0&&!un){
+   $("cuHint").innerHTML=`<span style="color:var(--bad)">✕ Username required for login</span>`;
+   $("cu").style.borderColor="var(--bad)";
+   isValid=false;
+  }else if(un&&/\s/.test(un)){
+   $("cuHint").innerHTML=`<span style="color:var(--bad)">✕ Username cannot contain spaces</span>`;
+   $("cu").style.borderColor="var(--bad)";
+   isValid=false;
+  }else{
+   $("cuHint").innerHTML="";
+   $("cu").style.borderColor="";
+  }
+
+  // Password length validation
+  if(pw.length===0){
+   $("cpHint").innerHTML="";
+   $("cp").style.borderColor="";
+   $("cpcHint").innerHTML="";
+   $("cpc").style.borderColor="";
+  }else if(pw.length<4){
+   $("cpHint").innerHTML=`<span style="color:var(--bad)">✕ Must be at least 4 characters (${pw.length}/4)</span>`;
+   $("cp").style.borderColor="var(--bad)";
+   isValid=false;
+  }else{
+   $("cpHint").innerHTML=`<span style="color:#2E7D32">✓ Password length OK</span>`;
+   $("cp").style.borderColor="#2E7D32";
+  }
+
+  // Confirm password validation
+  if(pw.length>=4){
+   if(cpw.length===0){
+    $("cpcHint").innerHTML=`<span class="muted">Re-type password to verify</span>`;
+    $("cpc").style.borderColor="";
+    isValid=false;
+   }else if(pw===cpw){
+    $("cpcHint").innerHTML=`<span style="color:#2E7D32;font-weight:600">✓ Passwords match</span>`;
+    $("cpc").style.borderColor="#2E7D32";
+   }else{
+    $("cpcHint").innerHTML=`<span style="color:var(--bad);font-weight:600">✕ Passwords do not match</span>`;
+    $("cpc").style.borderColor="var(--bad)";
+    isValid=false;
+   }
+  }else if(cpw.length>0){
+   $("cpcHint").innerHTML=`<span style="color:var(--bad)">✕ Enter 4+ characters above first</span>`;
+   $("cpc").style.borderColor="var(--bad)";
+   isValid=false;
+  }
+
+  return isValid;
+ };
+
+ $("cu").oninput=validateAuthLive;
+ $("cp").oninput=validateAuthLive;
+ $("cpc").oninput=validateAuthLive;
+
+ $("togglePwVis").onclick=()=>{
+  const isPass=$("cp").type==="password";
+  $("cp").type=isPass?"text":"password";
+  $("cpc").type=isPass?"text":"password";
+  $("togglePwVis").innerHTML=`<span class="material-symbols-outlined" style="font-size:18px">${isPass?'visibility_off':'visibility'}</span>`;
+ };
+
+ $("sv").onclick=async()=>{
+  const name=$("cn").value.trim(),slug=c?.slug||generateUniqueSlug(name,c?.id);
+  const username=$("cu").value.trim(),password=$("cp").value,confirmPass=$("cpc").value;
+  if(!name){$("msg").textContent="Please enter a client name.";return}
+  if(!validateAuthLive()){
+   $("msg").textContent="Please resolve the password errors indicated above.";
+   return;
+  }
+
+  // Step 1: Check password confirmation if entered
+  if(password||(!c&&password)){
+   if(password!==confirmPass){
+    $("msg").textContent="Passwords do not match. Please verify and re-enter.";
+    return;
+   }
+   if(password.length<4){
+    $("msg").textContent="Password must be at least 4 characters.";
+    return;
+   }
+
+   // Step 2: Show explicit verification view inside the modal
+   const accent=$("cc").value;
+   const modalBox=$("appModal").querySelector(".modal-box");
+   modalBox.innerHTML=`
+    <div class="modal-header-row">
+     <div style="display:flex;align-items:center;gap:8px">
+      <span class="material-symbols-outlined" style="color:var(--accent);font-size:24px">lock_reset</span>
+      <h3 style="margin:0">Step 2: Verify Credentials</h3>
+     </div>
+     <button class="modal-close-btn" id="closeStep2" type="button">
+      <span class="material-symbols-outlined">close</span>
+     </button>
+    </div>
+    <p class="muted" style="margin:0 0 12px">Please verify these credentials before saving for <b>${esc(name)}</b>. Copy them now to share with your client:</p>
+    <div style="background:var(--head);padding:14px;border-radius:10px;font-family:monospace;font-size:14px;display:flex;flex-direction:column;gap:8px">
+     <div><b>Portal URL:</b> <span>https://client.thynkculture.com</span></div>
+     <div><b>Username:</b> <span style="color:var(--accent);font-weight:700">${esc(username)}</span></div>
+     <div><b>Password:</b> <span style="font-weight:700">${esc(password)}</span></div>
+    </div>
+    <p class="msg" id="step2Msg"></p>
+    <div class="bar" style="margin-top:14px">
+     <button id="copyCreds" type="button"><span class="material-symbols-outlined">content_copy</span> Copy credentials</button>
+     <span class="sp"></span>
+     <button id="backStep2" type="button">Back</button>
+     <button class="pri" id="confirmStep2" type="button"><span class="material-symbols-outlined">check</span> Confirm & Save</button>
+    </div>`;
+
+   $("closeStep2").onclick=closeModal;
+   $("copyCreds").onclick=async()=>{
+    const text=`Thynkculture Client Portal\nURL: https://client.thynkculture.com\nUsername: ${username}\nPassword: ${password}`;
+    try{
+     await navigator.clipboard.writeText(text);
+     $("copyCreds").innerHTML=`<span class="material-symbols-outlined">done</span> Copied!`;
+     setTimeout(()=>{$("copyCreds").innerHTML=`<span class="material-symbols-outlined">content_copy</span> Copy credentials`},2500);
+    }catch(e){alert(text)}
+   };
+
+   $("backStep2").onclick=()=>clientForm(c?.id?{...c,name,slug,accent_color:accent,username,logo_url:clientLogoUrl}:null);
+   $("confirmStep2").onclick=async()=>{
+    $("confirmStep2").disabled=true;
+    $("step2Msg").textContent="Saving…";
+    await commitClientSave(c,name,slug,accent,username,password,clientLogoUrl);
+   };
+   return;
+  }
+
+  // If editing and password was untouched, save directly
+  $("sv").disabled=true;
+  $("msg").textContent="Saving…";
+  await commitClientSave(c,name,slug,$("cc").value,username,null,clientLogoUrl);
+ };
+}
+
+async function commitClientSave(c,name,slug,accent_color,username,password,logo_url){
+ const isEdit=Boolean(c&&c.id&&c.id!=="undefined");
+ let row={name,slug,accent_color,logo_url};
+ let data=null,error=null;
+
+ const res=isEdit?await sb.from("clients").update(row).eq("id",c.id).select().single():await sb.from("clients").insert(row).select().single();
+ data=res.data;
+ error=res.error;
+
+ if(error&&error.message&&error.message.includes("logo_url")){
+  delete row.logo_url;
+  const retry=isEdit?await sb.from("clients").update(row).eq("id",c.id).select().single():await sb.from("clients").insert(row).select().single();
+  data=retry.data;
+  error=retry.error;
+ }
+
+ if(error&&error.message&&(error.message.includes("clients_slug_key")||error.message.includes("slug"))){
+  // Auto-deduplicate slug if collision occurs in the database
+  const randomSuffix=Math.random().toString(36).substring(2,6);
+  row.slug=`${slug}-${randomSuffix}`;
+  const retrySlug=isEdit?await sb.from("clients").update(row).eq("id",c.id).select().single():await sb.from("clients").insert(row).select().single();
+  data=retrySlug.data;
+  error=retrySlug.error;
+ }
+
+ if(error){
+  const msgEl=$("msg")||$("step2Msg");
+  if(msgEl){
+   if(error.message.includes("clients_slug_key")){
+    msgEl.textContent="A client with a similar name or slug already exists. Please choose a different name.";
+   }else{
+    msgEl.textContent=error.message;
+   }
+  }
+  const confirmBtn=$("confirmStep2"),saveBtn=$("sv");
+  if(confirmBtn) confirmBtn.disabled=false;
+  if(saveBtn) saveBtn.disabled=false;
+  return;
+ }
+
+ if(!data||!data.id){
+  try{
+   const {data:fetched}=await sb.from("clients").select("*").eq("slug",row.slug).maybeSingle();
+   if(fetched&&fetched.id) data=fetched;
+  }catch(e){}
+ }
+
+ if(!data||!data.id){
+  const msgEl=$("msg")||$("step2Msg");
+  if(msgEl) msgEl.textContent="Client saved, but could not retrieve ID. Please refresh.";
+  const confirmBtn=$("confirmStep2"),saveBtn=$("sv");
+  if(confirmBtn) confirmBtn.disabled=false;
+  if(saveBtn) saveBtn.disabled=false;
+  return;
+ }
+
+ cur=data;
+ cur.logo_url=logo_url;
+ if(logo_url){
+  localStorage.setItem("tc_logo_"+cur.id,logo_url);
+ }else{
+  localStorage.removeItem("tc_logo_"+cur.id);
+ }
+
+ if(username&&password&&cur&&cur.id&&cur.id!=="undefined"){
+  try{
+   const {data:rpcData,error:rpcErr}=await sb.rpc("admin_set_client_login",{p_client_id:cur.id,p_username:username,p_password:password});
+   if(rpcErr){console.warn("Supabase RPC admin_set_client_login pending:",rpcErr.message)}
+   else if(rpcData&&!rpcData.success){
+    const msgEl=$("msg")||$("step2Msg");
+    if(msgEl){msgEl.textContent=rpcData.error;return}
+   }
+  }catch(e){console.warn("RPC not yet created:",e)}
+ }
+ closeModal();
+ await home();
+}
+
+// Option A: Client-Side Image Compression & WebP Conversion (Max 1440px, Quality 0.82)
+async function compressImage(file, maxDimension=1440, quality=0.82){
+ if(!file||!file.type.startsWith("image/")||file.type==="image/gif"||file.type==="image/svg+xml"){
+  return file;
+ }
+ return new Promise((resolve)=>{
+  const reader=new FileReader();
+  reader.onerror=()=>resolve(file);
+  reader.onload=e=>{
+   const img=new Image();
+   img.onerror=()=>resolve(file);
+   img.onload=()=>{
+    let w=img.width,h=img.height;
+    if(w>maxDimension||h>maxDimension){
+     if(w>h){
+      h=Math.round((h*maxDimension)/w);
+      w=maxDimension;
+     }else{
+      w=Math.round((w*maxDimension)/h);
+      h=maxDimension;
+     }
+    }
+    const canvas=document.createElement("canvas");
+    canvas.width=w;
+    canvas.height=h;
+    const ctx=canvas.getContext("2d");
+    ctx.imageSmoothingEnabled=true;
+    ctx.imageSmoothingQuality="high";
+    ctx.drawImage(img,0,0,w,h);
+
+    canvas.toBlob(blob=>{
+     if(!blob||blob.size>=file.size){
+      resolve(file);
+     }else{
+      const baseName=file.name.replace(/\.[^/.]+$/,"");
+      const compressed=new File([blob],`${baseName}.webp`,{type:"image/webp"});
+      resolve(compressed);
+     }
+    },"image/webp",quality);
+   };
+   img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+ });
+}
+
+// Post Form Popup Modal
 function postForm(p){
  const o=(arr,v)=>arr.map(x=>`<option ${x===v?"selected":""}>${x}</option>`).join("");
- $("form").innerHTML=`<div class="panel"><h2>${p.id?"Edit post":"New post"}</h2><div class="two"><div><label>Date</label><input id="pd" type="date" value="${p.post_date||""}"></div><div><label>Type</label><select id="pt">${o(["Poster","Reel"],p.type)}</select></div></div>
- <div class="two"><div><label>Content pillar</label><input id="pp" value="${esc(p.pillar)}" placeholder="Menu, Collab, Film Dialogues…"></div><div><label>Status</label><select id="ps">${o(["planned","designed","ready","posted"],p.status||"planned")}</select></div></div>
- <label>Content</label><textarea id="pc" rows="2">${esc(p.content)}</textarea><label>Instagram reference link</label><input id="pl" value="${esc(p.ref_link)}" placeholder="https://www.instagram.com/p/…">
- <label>Final post image</label><input id="pi" type="file" accept="image/*">${p.image_url?`<p class="muted">The current image is kept unless you choose a new one.</p>`:""}
- <p class="msg" id="msg"></p><div class="bar"><button class="pri" id="sv">Save post</button><button id="cx">Cancel</button></div></div>`;
- $("cx").onclick=()=>$("form").innerHTML="";
- $("sv").onclick=async()=>{const date=$("pd").value;if(!date){$("msg").textContent="Pick a date.";return}
+ const canvas=getClientCanvas(cur||{});
+ const html=`
+  <div class="modal-header-row">
+   <h2 style="margin:0">${p.id?"Edit post":"New post"}</h2>
+   <button class="modal-close-btn" id="closePostModal" type="button">
+    <span class="material-symbols-outlined">close</span>
+   </button>
+  </div>
+  <div class="two">
+   <div><label>Date</label><input id="pd" type="date" value="${p.post_date||""}"></div>
+   <div><label>Type</label><select id="pt">${o(["Poster","Reel"],p.type)}</select></div>
+  </div>
+  <div class="two">
+   <div>
+    <label>Content pillar</label>
+    <input id="pp" value="${esc(p.pillar)}" list="pillarSuggest" placeholder="Menu, Collab, Special Day…">
+    <datalist id="pillarSuggest">
+     ${(canvas.pillars||[]).map(x=>`<option value="${esc(x)}">`).join("")}
+    </datalist>
+   </div>
+   <div><label>Status</label><select id="ps">${o(["planned","designed","ready","posted"],p.status||"planned")}</select></div>
+  </div>
+  <label>Content</label><textarea id="pc" rows="2">${esc(p.content)}</textarea>
+  <label>Instagram reference link</label><input id="pl" value="${esc(p.ref_link)}" placeholder="https://www.instagram.com/p/…">
+  <label>Final post image (Auto-compressed to WebP)</label><input id="pi" type="file" accept="image/*">${p.image_url?`<p class="muted">The current image is kept unless you choose a new one.</p>`:""}
+  <p class="msg" id="msg"></p>
+  <div class="bar">
+   <button class="pri" id="sv"><span class="material-symbols-outlined">save</span> Save post</button>
+   <button id="cx" type="button">Cancel</button>
+   ${p.id?`
+    <span class="sp"></span>
+    <button class="danger" id="delpForm" type="button"><span class="material-symbols-outlined">delete</span> Delete post</button>
+   `:""}
+  </div>`;
+
+ openModal(html);
+ $("closePostModal").onclick=closeModal;
+ $("cx").onclick=closeModal;
+ if(p.id){
+  $("delpForm").onclick=()=>{closeModal();confirmDeletePost(p.id)};
+ }
+
+ $("sv").onclick=async()=>{
+  if(!cur||!cur.id||cur.id==="undefined"){
+   $("msg").textContent="Please select a valid client first.";
+   return;
+  }
+  const date=$("pd").value;
+  if(!date){$("msg").textContent="Pick a date.";return}
+  $("sv").disabled=true;
+  $("msg").textContent="Saving post…";
+
   let image_url=p.image_url||null;const f=$("pi").files[0];
-  if(f){const path=`${cur.slug}/${date}-${Date.now()}.${f.name.split(".").pop()}`;const {error}=await sb.storage.from("post-images").upload(path,f);if(error){$("msg").textContent=error.message;return}image_url=sb.storage.from("post-images").getPublicUrl(path).data.publicUrl}
+  if(f){
+   const origMb=(f.size/(1024*1024)).toFixed(1);
+   $("msg").textContent=`Optimizing image (${origMb}MB)…`;
+   const compressed=await compressImage(f,1440,0.82);
+   const newKb=(compressed.size/1024).toFixed(0);
+   $("msg").textContent=`Uploading optimized image (${newKb}KB)…`;
+   const ext=compressed.type==="image/webp"?"webp":f.name.split(".").pop();
+   const path=`${cur.slug}/${date}-${Date.now()}.${ext}`;
+   const {error}=await sb.storage.from("post-images").upload(path,compressed,{
+    contentType:compressed.type||"image/webp",
+    cacheControl:"31536000, immutable"
+   });
+   if(error){$("msg").textContent=error.message;$("sv").disabled=false;return}
+   image_url=sb.storage.from("post-images").getPublicUrl(path).data.publicUrl;
+  }
   const row={client_id:cur.id,post_date:date,type:$("pt").value,pillar:$("pp").value.trim(),content:$("pc").value.trim(),ref_link:$("pl").value.trim()||null,status:$("ps").value,image_url,updated_at:new Date().toISOString()};
   const {error}=p.id?await sb.from("posts").update(row).eq("id",p.id):await sb.from("posts").insert(row);
-  if(error){$("msg").textContent=error.message;return}$("form").innerHTML="";loadPosts()}}
+  if(error){$("msg").textContent=error.message;$("sv").disabled=false;return}
+  closeModal();
+  loadPosts();
+ };
+}
+
 boot();
 </script></body></html>

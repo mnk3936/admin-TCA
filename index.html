@@ -1,57 +1,204 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8">
+<html lang="en">
+<head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Content Calendar</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css">
-</head><body><div class="wrap">
-<header><div><h1 id="title">Loading…</h1><p id="sub">Instagram content calendar</p></div><div class="stats" id="stats"></div></header>
-<div class="bar" id="filters" role="group" aria-label="Filter by content type"></div>
-<div class="bar"><button id="prev" aria-label="Previous month">‹ Prev</button><div class="month" id="mlabel"></div><button id="next" aria-label="Next month">Next ›</button><span class="sp"></span><button id="todayBtn">Jump to today</button></div>
-<div class="grid" id="dows"></div><div class="grid" id="grid" style="margin-top:6px"></div>
-<div class="panel" id="detail"></div>
-</div>
+<style>
+.login{max-width:380px;margin:60px auto}
+.head-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.35);border-top-color:currentColor;border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:-2px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
 <script>if(location.hostname.startsWith("admin."))location.replace("/admin/");</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="/assets/config.js"></script>
 <script>
+const sb=supabase.createClient(CFG.url,CFG.key);
 const $=id=>document.getElementById(id),pad=n=>String(n).padStart(2,"0");
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const MN=["January","February","March","April","May","June","July","August","September","October","November","December"],DN=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const KINDS={Poster:"Poster",Reel:"Reel",Collab:"Collab",Spl:"Special day"},CV={Poster:["--poster","--posterbg"],Reel:["--reel","--reelbg"],Collab:["--collab","--collabbg"],Spl:["--spl","--splbg"]};
 const now=new Date(),TODAY=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
 let y=now.getFullYear(),m=now.getMonth(),filter="All",sel=TODAY,by={},D=[];
-const host=location.hostname.split(".");
-const slug=new URLSearchParams(location.search).get("client")||(host.length>=3&&!location.hostname.endsWith("vercel.app")?host[0]:"zahran");
 const kind=p=>p.pillar==="Spl Day"?"Spl":p.pillar==="Collab"?"Collab":p.type;
 const ok=p=>p.status==="ready"||p.status==="posted";
-$("dows").innerHTML=DN.map(d=>`<div class="dow">${d}</div>`).join("");
-async function load(){
- const sb=supabase.createClient(CFG.url,CFG.key);
- const {data,error}=await sb.rpc("get_calendar",{p_slug:slug});
- if(error||!data){$("title").textContent="Calendar not found";$("sub").textContent="Check the link and try again.";return}
- document.title=data.client.name+" · Content Calendar";$("title").textContent=data.client.name;
- if(data.client.accent_color)document.documentElement.style.setProperty("--accent",data.client.accent_color);
- D=data.posts.map(p=>({...p,k:kind(p)}));by=Object.fromEntries(D.map(p=>[p.date,p]));
- if(D.length&&!by[TODAY]){const f=D.find(p=>p.date>=TODAY)||D[D.length-1];[y,m]=[+f.date.slice(0,4),+f.date.slice(5,7)-1]}
- stats();filters();grid();detail();
+
+function getStoredAuth(){
+  try{return JSON.parse(localStorage.getItem("tc_client_auth")||"null")}catch(e){return null}
 }
-function stats(){const c=k=>D.filter(x=>x.type===k).length;$("stats").innerHTML=`<div><b>${D.length}</b>planned</div><div><b>${c("Poster")}</b>posters</div><div><b>${c("Reel")}</b>reels</div><div><b>${D.filter(ok).length}</b>ready</div>`}
-function filters(){$("filters").innerHTML=["All",...Object.keys(KINDS)].map(k=>`<button class="${filter===k?"on":""}" data-k="${k}">${k==="All"?"All":`<span class="dot" style="background:var(${CV[k][0]})"></span>${KINDS[k]}`}</button>`).join("");
- $("filters").querySelectorAll("button").forEach(b=>b.onclick=()=>{filter=b.dataset.k;filters();grid()})}
+function setStoredAuth(data){
+  if(!data)localStorage.removeItem("tc_client_auth");
+  else localStorage.setItem("tc_client_auth",JSON.stringify(data));
+}
+
+function loginView(msg=""){
+  $("app").innerHTML=`
+    <div class="panel login">
+      <h2>Client login</h2>
+      <p class="muted">Enter your client credentials to view your content calendar</p>
+      <label for="un">Username</label>
+      <input id="un" type="text" autocomplete="username" placeholder="e.g. zahran" autofocus>
+      <label for="pw">Password</label>
+      <input id="pw" type="password" autocomplete="current-password" placeholder="Password">
+      <p class="msg" id="msg">${esc(msg)}</p>
+      <div class="bar">
+        <button class="pri" id="in">Sign in</button>
+      </div>
+    </div>`;
+
+  const doLogin=async()=>{
+    const un=$("un").value.trim(),pw=$("pw").value;
+    if(!un||!pw){$("msg").textContent="Please enter both username and password.";return}
+    $("msg").textContent="";
+    $("in").disabled=true;
+    $("in").innerHTML=`<span class="spinner"></span> Signing in…`;
+
+    try{
+      const {data,error}=await sb.rpc("client_login",{p_username:un,p_password:pw});
+      if(error){
+        $("in").disabled=false;
+        $("in").textContent="Sign in";
+        $("msg").textContent=error.message||"Unable to sign in. Please ensure Supabase database functions are configured.";
+        return;
+      }
+      if(!data||!data.success){
+        $("in").disabled=false;
+        $("in").textContent="Sign in";
+        $("msg").textContent=data?.error||"Invalid username or password.";
+        return;
+      }
+
+      setStoredAuth({username:un,password:pw});
+      renderCalendar(data.client,data.posts);
+    }catch(err){
+      $("in").disabled=false;
+      $("in").textContent="Sign in";
+      $("msg").textContent=err.message||"Connection error. Please try again.";
+    }
+  };
+
+  $("in").onclick=doLogin;
+  [$("un"),$("pw")].forEach(inp=>{
+    inp.onkeydown=e=>{if(e.key==="Enter")doLogin()};
+  });
+}
+
+function renderCalendar(client,posts){
+  document.title=client.name+" · Content Calendar";
+  if(client.accent_color)document.documentElement.style.setProperty("--accent",client.accent_color);
+
+  D=(posts||[]).map(p=>({...p,k:kind(p)}));
+  by=Object.fromEntries(D.map(p=>[p.date,p]));
+  if(D.length&&!by[TODAY]){
+    const f=D.find(p=>p.date>=TODAY)||D[D.length-1];
+    [y,m]=[+f.date.slice(0,4),+f.date.slice(5,7)-1];
+  }
+
+  $("app").innerHTML=`
+    <header>
+      <div>
+        <h1 id="title">${esc(client.name)}</h1>
+        <p id="sub">Instagram content calendar</p>
+      </div>
+      <div class="head-actions">
+        <div class="stats" id="stats"></div>
+        <button id="outBtn" style="font-size:13px;padding:6px 14px">Log out</button>
+      </div>
+    </header>
+    <div class="bar" id="filters" role="group" aria-label="Filter by content type"></div>
+    <div class="bar">
+      <button id="prev" aria-label="Previous month">‹ Prev</button>
+      <div class="month" id="mlabel"></div>
+      <button id="next" aria-label="Next month">Next ›</button>
+      <span class="sp"></span>
+      <button id="todayBtn">Jump to today</button>
+    </div>
+    <div class="grid" id="dows">${DN.map(d=>`<div class="dow">${d}</div>`).join("")}</div>
+    <div class="grid" id="grid" style="margin-top:6px"></div>
+    <div class="panel" id="detail"></div>`;
+
+  $("outBtn").onclick=()=>{
+    setStoredAuth(null);
+    loginView("You have been signed out.");
+  };
+
+  $("prev").onclick=()=>{m--;if(m<0){m=11;y--}grid()};
+  $("next").onclick=()=>{m++;if(m>11){m=0;y++}grid()};
+  $("todayBtn").onclick=()=>{y=now.getFullYear();m=now.getMonth();sel=TODAY;grid();detail()};
+
+  stats();filters();grid();detail();
+}
+
+function stats(){
+  const c=k=>D.filter(x=>x.type===k).length;
+  $("stats").innerHTML=`<div><b>${D.length}</b>planned</div><div><b>${c("Poster")}</b>posters</div><div><b>${c("Reel")}</b>reels</div><div><b>${D.filter(ok).length}</b>ready</div>`;
+}
+
+function filters(){
+  $("filters").innerHTML=["All",...Object.keys(KINDS)].map(k=>`<button class="${filter===k?"on":""}" data-k="${k}">${k==="All"?"All":`<span class="dot" style="background:var(${CV[k][0]})"></span>${KINDS[k]}`}</button>`).join("");
+  $("filters").querySelectorAll("button").forEach(b=>b.onclick=()=>{filter=b.dataset.k;filters();grid()});
+}
+
 function grid(){
- $("mlabel").textContent=MN[m]+" "+y;const first=new Date(y,m,1).getDay(),len=new Date(y,m+1,0).getDate();let h="";
- for(let i=0;i<first;i++)h+=`<div class="day empty"></div>`;
- for(let d=1;d<=len;d++){const key=`${y}-${pad(m+1)}-${pad(d)}`,e=by[key],show=e&&(filter==="All"||e.k===filter);
-  h+=`<button class="day${key===TODAY?" today":""}${key===sel?" sel":""}" data-d="${key}" aria-label="${d} ${MN[m]}${e?": "+esc(e.type)+", "+esc(e.pillar):""}"><span class="n">${d}</span>${show?`<span class="chip ${e.k}"><b>${esc(e.type)}${ok(e)?" ✓":""}</b><i>${esc(e.pillar)}</i></span>`:""}</button>`}
- $("grid").innerHTML=h;$("grid").querySelectorAll("button.day").forEach(b=>b.onclick=()=>{sel=b.dataset.d;grid();detail()})}
+  $("mlabel").textContent=MN[m]+" "+y;
+  const first=new Date(y,m,1).getDay(),len=new Date(y,m+1,0).getDate();
+  let h="";
+  for(let i=0;i<first;i++)h+=`<div class="day empty"></div>`;
+  for(let d=1;d<=len;d++){
+    const key=`${y}-${pad(m+1)}-${pad(d)}`,e=by[key],show=e&&(filter==="All"||e.k===filter);
+    h+=`<button class="day${key===TODAY?" today":""}${key===sel?" sel":""}" data-d="${key}" aria-label="${d} ${MN[m]}${e?": "+esc(e.type)+", "+esc(e.pillar):""}"><span class="n">${d}</span>${show?`<span class="chip ${e.k}"><b>${esc(e.type)}${ok(e)?" ✓":""}</b><i>${esc(e.pillar)}</i></span>`:""}</button>`;
+  }
+  $("grid").innerHTML=h;
+  $("grid").querySelectorAll("button.day").forEach(b=>b.onclick=()=>{sel=b.dataset.d;grid();detail()});
+}
+
 function detail(){
- const [yy,mm,dd]=sel.split("-").map(Number),dt=new Date(yy,mm-1,dd),e=by[sel],t=`${DN[dt.getDay()]}, ${dd} ${MN[mm-1]} ${yy}`;
- if(!e){$("detail").innerHTML=`<h2>${t}</h2><p class="muted">Nothing is scheduled for this day.</p>`;return}
- const c=CV[e.k],st={planned:"Planned",designed:"Designed",ready:"✓ Final post ready",posted:"✓ Posted"}[e.status]||e.status;
- const link=/^https?:\/\//.test(e.ref_link||"")?`<a href="${esc(e.ref_link)}" target="_blank" rel="noopener">View Instagram reference</a>`:"None added";
- $("detail").innerHTML=`<h2>${t}</h2><span class="tag" style="background:var(${c[1]});border:1.5px solid var(${c[0]})">${esc(e.type)}</span><dl><dt>Content pillar</dt><dd>${esc(e.pillar)}</dd><dt>Content</dt><dd>${esc(e.content)||"—"}</dd><dt>Reference</dt><dd>${link}</dd><dt>Status</dt><dd>${st}</dd></dl>${e.image_url?`<img src="${esc(e.image_url)}" alt="Final post">`:""}`}
-$("prev").onclick=()=>{m--;if(m<0){m=11;y--}grid()};$("next").onclick=()=>{m++;if(m>11){m=0;y++}grid()};
-$("todayBtn").onclick=()=>{y=now.getFullYear();m=now.getMonth();sel=TODAY;grid();detail()};
-load();
-</script></body></html>
+  const [yy,mm,dd]=sel.split("-").map(Number),dt=new Date(yy,mm-1,dd),e=by[sel],t=`${DN[dt.getDay()]}, ${dd} ${MN[mm-1]} ${yy}`;
+  if(!e){$("detail").innerHTML=`<h2>${t}</h2><p class="muted">Nothing is scheduled for this day.</p>`;return}
+  const c=CV[e.k],st={planned:"Planned",designed:"Designed",ready:"✓ Final post ready",posted:"✓ Posted"}[e.status]||e.status;
+  const link=/^https?:\/\//.test(e.ref_link||"")?`<a href="${esc(e.ref_link)}" target="_blank" rel="noopener">View Instagram reference</a>`:"None added";
+  $("detail").innerHTML=`<h2>${t}</h2><span class="tag" style="background:var(${c[1]});border:1.5px solid var(${c[0]})">${esc(e.type)}</span><dl><dt>Content pillar</dt><dd>${esc(e.pillar)}</dd><dt>Content</dt><dd>${esc(e.content)||"—"}</dd><dt>Reference</dt><dd>${link}</dd><dt>Status</dt><dd>${st}</dd></dl>${e.image_url?`<img src="${esc(e.image_url)}" alt="Final post">`:""}`;
+}
+
+async function boot(){
+  // Allow ?client=slug or ?preview=slug for previewing
+  const qSlug=new URLSearchParams(location.search).get("client")||new URLSearchParams(location.search).get("preview");
+  if(qSlug){
+    try{
+      const {data,error}=await sb.rpc("get_calendar",{p_slug:qSlug});
+      if(!error&&data&&data.client){
+        renderCalendar(data.client,data.posts);
+        return;
+      }
+    }catch(e){}
+  }
+
+  // Restore stored session if present
+  const auth=getStoredAuth();
+  if(auth&&auth.username&&auth.password){
+    try{
+      const {data,error}=await sb.rpc("client_login",{p_username:auth.username,p_password:auth.password});
+      if(!error&&data&&data.success){
+        renderCalendar(data.client,data.posts);
+        return;
+      }
+      setStoredAuth(null);
+    }catch(e){
+      setStoredAuth(null);
+    }
+  }
+
+  loginView();
+}
+
+boot();
+</script>
+</body>
+</html>
