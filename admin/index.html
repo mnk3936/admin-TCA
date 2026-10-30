@@ -100,33 +100,70 @@ button:not(.day), a.fab-item, .view-btn {
 /* Mobile & Touch Responsive Optimization */
 @media(max-width:640px){
   header{padding:14px 16px;gap:10px}
+  /* Mobile Subnav Bar: Single Sleek Row with Smooth Edge-to-Edge Touch Scroll */
   .client-subnav-bar{
-    top:6px;
-    padding:6px 8px;
-    gap:8px;
+    top:4px;
+    padding:5px 6px;
+    gap:6px;
+    border-radius:14px;
+    background:#ffffff !important;
+    border:1.5px solid #E8E6DC !important;
+    margin:8px 0 12px;
+    box-shadow:0 4px 16px rgba(0,0,0,0.06) !important;
     flex-wrap:nowrap;
     align-items:center;
   }
   .client-subnav-bar .view-toggle{
+    background:transparent !important;
+    border:0 !important;
+    padding:0 !important;
+    gap:5px;
     flex-wrap:nowrap;
     overflow-x:auto;
     -webkit-overflow-scrolling:touch;
     scrollbar-width:none;
-    max-width:calc(100% - 94px);
+    flex:1;
+    min-width:0;
   }
   .client-subnav-bar .view-toggle::-webkit-scrollbar{display:none}
   .client-subnav-bar .view-btn{
-    white-space:nowrap;
-    flex-shrink:0;
-    padding:5px 10px;
-    font-size:12px;
+    background:#F4F3ED !important;
+    color:#4A4944 !important;
+    border:1px solid #E8E6DC !important;
+    padding:6px 11px !important;
+    font-size:12px !important;
+    font-weight:600 !important;
+    border-radius:999px !important;
+    white-space:nowrap !important;
+    flex-shrink:0 !important;
+    min-height:32px;
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
   }
+  .client-subnav-bar .view-btn .material-symbols-outlined{font-size:16px !important}
+  .client-subnav-bar .view-btn.on{
+    background:#141413 !important;
+    color:#ffffff !important;
+    border-color:#141413 !important;
+  }
+  .client-subnav-bar .sp{display:none}
   .client-subnav-bar #subnavAddPost{
-    white-space:nowrap;
-    flex-shrink:0;
-    padding:5px 10px;
-    font-size:12px;
+    background:#141413 !important;
+    color:#ffffff !important;
+    border:1px solid #141413 !important;
+    padding:6px 10px !important;
+    font-size:12px !important;
+    font-weight:600 !important;
+    border-radius:999px !important;
+    white-space:nowrap !important;
+    flex-shrink:0 !important;
+    min-height:32px;
+    display:inline-flex;
+    align-items:center;
+    gap:3px;
   }
+  .client-subnav-bar #subnavAddPost .material-symbols-outlined{font-size:16px !important}
   .client-switcher-wrap{width:100%}
   .client-switcher-btn{width:100%;max-width:100%;justify-content:space-between}
   .switcher-btn-name{max-width:none;flex:1}
@@ -142,6 +179,25 @@ button:not(.day), a.fab-item, .view-btn {
   .kpi b{font-size:20px}
   .kpi span{font-size:10.5px}
   .client-cards{grid-template-columns:1fr}
+}
+
+/* Client Details & Credentials Section */
+.details-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:14px}
+.details-card{background:var(--head);border:1.5px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.details-card-header{display:flex;align-items:center;gap:8px;padding-bottom:10px;border-bottom:1px solid var(--line);font-size:14px;font-weight:700;color:var(--ink)}
+.cred-item{display:flex;flex-direction:column;gap:4px}
+.cred-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mute)}
+.cred-val-row{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px;min-height:36px}
+.cred-val{font-size:13px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.cred-mini-btn{border:0 !important;background:transparent !important;color:var(--mute) !important;padding:4px !important;border-radius:6px !important;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;box-shadow:none !important;line-height:1}
+.cred-mini-btn:hover{background:color-mix(in srgb,var(--head) 70%,white) !important;color:var(--ink) !important}
+.detail-row{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:13px;padding:5px 0;border-bottom:1px dashed color-mix(in srgb,var(--line) 70%,transparent)}
+.detail-row:last-child{border-bottom:0}
+.detail-label{color:var(--mute);font-size:12.5px;flex-shrink:0}
+.detail-value{color:var(--ink);text-align:right;word-break:break-word}
+@media(max-width:480px){
+  .details-grid{grid-template-columns:1fr;gap:10px}
+  .details-card{padding:14px}
 }
 
 /* Button Hover Animation - Subtle Lighten (No Shadow) */
@@ -984,6 +1040,13 @@ function updateSubnavActive(){
  $("btnVStrategy").className=`view-btn ${adminView==='strategy'?'on':''}`;
  $("btnVDocs").className=`view-btn ${adminView==='docs'?'on':''}`;
  $("btnVReports").className=`view-btn ${adminView==='reports'?'on':''}`;
+
+ try{
+  const activeBtn=document.querySelector(".client-subnav-bar .view-btn.on");
+  if(activeBtn&&window.innerWidth<=640){
+   activeBtn.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"});
+  }
+ }catch(e){}
 }
 
 window.addEventListener("click",e=>{
@@ -1326,9 +1389,264 @@ async function togglePosted(postId){
  }catch(err){console.error(err)}
 }
 
+function getClientDetails(c){
+ if(!c)return {};
+ if(c.details&&typeof c.details==="object")return c.details;
+ if(c.canvas&&c.canvas.details&&typeof c.canvas.details==="object")return c.canvas.details;
+ try{
+  const cached=JSON.parse(localStorage.getItem("tc_details_"+c.id));
+  if(cached)return cached;
+ }catch(e){}
+ return {
+  contactPerson:"",
+  email:"",
+  phone:"",
+  instagram:"",
+  duration:"6 Months Retainer",
+  startDate:"",
+  endDate:"",
+  status:"Active Retainer",
+  monthlyTarget:12,
+  notes:""
+ };
+}
+
+function getClientCreds(c){
+ if(!c)return null;
+ try{
+  const raw=localStorage.getItem("tc_cred_"+c.id);
+  if(raw)return JSON.parse(raw);
+ }catch(e){}
+ return null;
+}
+
+async function saveClientDetails(c, newDetails){
+ if(!c||!c.id)return;
+ c.details=newDetails;
+ if(!c.canvas||typeof c.canvas!=="object"){
+  c.canvas=getClientCanvas(c);
+ }
+ c.canvas.details=newDetails;
+ try{
+  localStorage.setItem("tc_details_"+c.id,JSON.stringify(newDetails));
+  localStorage.setItem("tc_canvas_"+c.id,JSON.stringify(c.canvas));
+ }catch(e){}
+
+ try{
+  await sb.from("clients").update({canvas:c.canvas,details:newDetails}).eq("id",c.id);
+ }catch(e){
+  try{await sb.from("clients").update({canvas:c.canvas}).eq("id",c.id)}catch(e2){}
+ }
+}
+
+function getStatusTagStyle(st){
+ switch(st){
+  case "Active Retainer": return "background:#E8F5E9;color:#1B5E20;border:1px solid #C8E6C9";
+  case "Onboarding": return "background:#E1ECF6;color:#1565C0;border:1px solid #BBDEFB";
+  case "Renewing Soon": return "background:#FFF8E1;color:#F57F17;border:1px solid #FFE082";
+  case "Paused": return "background:#ECEFF1;color:#546E7A;border:1px solid #CFD8DC";
+  case "Completed": return "background:#F3E5F5;color:#6A1B9A;border:1px solid #E1BEE7";
+  default: return "background:#E8F5E9;color:#1B5E20;border:1px solid #C8E6C9";
+ }
+}
+
+function resetPasswordModal(c){
+ if(!c)return;
+ const un=c.username||c.slug;
+ const html=`
+  <div class="modal-header-row">
+   <div style="display:flex;align-items:center;gap:8px">
+    <span class="material-symbols-outlined" style="color:var(--accent);font-size:22px">lock_reset</span>
+    <h3 style="margin:0">Set Client Password</h3>
+   </div>
+   <button class="modal-close-btn" id="closePwModal" type="button">
+    <span class="material-symbols-outlined">close</span>
+   </button>
+  </div>
+  <p class="muted" style="margin:0 0 12px">Update the client portal login password for <b>${esc(c.name)}</b> (Username: <b>@${esc(un)}</b>):</p>
+  <div>
+   <label>New Password</label>
+   <div style="position:relative">
+    <input id="quickNewPw" type="password" placeholder="At least 4 characters" autocomplete="new-password" style="padding-right:34px">
+    <button type="button" id="toggleQuickPwVis" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:transparent;padding:4px;cursor:pointer;color:var(--mute);display:flex">
+     <span class="material-symbols-outlined" style="font-size:18px">visibility</span>
+    </button>
+   </div>
+  </div>
+  <div style="margin-top:10px">
+   <label>Confirm Password</label>
+   <input id="quickConfirmPw" type="password" placeholder="Re-enter password to verify" autocomplete="new-password">
+  </div>
+  <p class="msg" id="quickPwMsg" style="min-height:18px;margin:8px 0"></p>
+  <div class="bar" style="margin-top:14px">
+   <span class="sp"></span>
+   <button type="button" id="quickPwCancel">Cancel</button>
+   <button class="pri" id="quickPwSave" type="button"><span class="material-symbols-outlined">save</span> Save & Update</button>
+  </div>
+ `;
+
+ openModal(html);
+ $("closePwModal").onclick=closeModal;
+ $("quickPwCancel").onclick=closeModal;
+ $("toggleQuickPwVis").onclick=()=>{
+  const isPass=$("quickNewPw").type==="password";
+  $("quickNewPw").type=isPass?"text":"password";
+  $("quickConfirmPw").type=isPass?"text":"password";
+  $("toggleQuickPwVis").innerHTML=`<span class="material-symbols-outlined" style="font-size:18px">${isPass?'visibility_off':'visibility'}</span>`;
+ };
+
+ $("quickPwSave").onclick=async()=>{
+  const p1=$("quickNewPw").value, p2=$("quickConfirmPw").value;
+  const msgEl=$("quickPwMsg");
+  msgEl.textContent="";
+  if(!p1||p1.length<4){
+   msgEl.textContent="Password must be at least 4 characters.";
+   return;
+  }
+  if(p1!==p2){
+   msgEl.textContent="Passwords do not match.";
+   return;
+  }
+  $("quickPwSave").disabled=true;
+  $("quickPwSave").innerHTML=`<span class="spinner"></span> Saving…`;
+
+  try{
+   localStorage.setItem("tc_cred_"+c.id,JSON.stringify({
+    username:un,
+    password:p1,
+    portalUrl:"https://client.thynkculture.com",
+    updatedAt:new Date().toISOString()
+   }));
+   try{
+    await sb.rpc("admin_set_client_login",{p_client_id:c.id,p_username:un,p_password:p1});
+   }catch(rpcErr){console.warn("RPC:",rpcErr)}
+
+   closeModal();
+   renderClientOverview();
+  }catch(err){
+   msgEl.textContent=err.message||err;
+   $("quickPwSave").disabled=false;
+   $("quickPwSave").innerHTML=`<span class="material-symbols-outlined">save</span> Save & Update`;
+  }
+ };
+}
+
+function editClientDetailsModal(c){
+ if(!c)return;
+ const d=getClientDetails(c);
+ const html=`
+  <div class="modal-header-row">
+   <div style="display:flex;align-items:center;gap:8px">
+    <span class="material-symbols-outlined" style="color:var(--accent);font-size:22px">edit_note</span>
+    <h3 style="margin:0">Edit Client Details</h3>
+   </div>
+   <button class="modal-close-btn" id="closeDetailsModal" type="button">
+    <span class="material-symbols-outlined">close</span>
+   </button>
+  </div>
+  <p class="muted" style="margin:0 0 14px">Contact information, engagement duration & contract details for <b>${esc(c.name)}</b>:</p>
+
+  <div style="display:flex;flex-direction:column;gap:12px">
+   <div>
+    <label style="font-weight:600;margin:0 0 4px">Contact Person</label>
+    <input id="edContactPerson" value="${esc(d.contactPerson||'')}" placeholder="e.g. Sarah Al-Zahran (Brand Manager)">
+   </div>
+
+   <div class="two">
+    <div>
+     <label style="font-weight:600;margin:0 0 4px">Contact Email</label>
+     <input id="edEmail" type="email" value="${esc(d.email||'')}" placeholder="contact@client.com">
+    </div>
+    <div>
+     <label style="font-weight:600;margin:0 0 4px">Phone / WhatsApp</label>
+     <input id="edPhone" value="${esc(d.phone||'')}" placeholder="+966 50 123 4567">
+    </div>
+   </div>
+
+   <div class="two">
+    <div>
+     <label style="font-weight:600;margin:0 0 4px">Instagram Handle</label>
+     <input id="edInstagram" value="${esc(d.instagram||'')}" placeholder="@username">
+    </div>
+    <div>
+     <label style="font-weight:600;margin:0 0 4px">Monthly Target</label>
+     <input id="edMonthlyTarget" type="number" min="1" value="${d.monthlyTarget||12}" placeholder="Posts per month">
+    </div>
+   </div>
+
+   <div style="border-top:1px solid var(--line);padding-top:10px;margin-top:4px">
+    <b style="font-size:13.5px;display:block;margin-bottom:8px">Engagement & Contract Duration</b>
+    <div class="two">
+     <div>
+      <label style="font-weight:600;margin:0 0 4px">Duration / Retainer Term</label>
+      <input id="edDuration" value="${esc(d.duration||'6 Months Retainer')}" placeholder="e.g. 6 Months Retainer">
+     </div>
+     <div>
+      <label style="font-weight:600;margin:0 0 4px">Retainer Status</label>
+      <select id="edStatus">
+       <option value="Active Retainer" ${(d.status==='Active Retainer'||!d.status)?'selected':''}>Active Retainer</option>
+       <option value="Onboarding" ${d.status==='Onboarding'?'selected':''}>Onboarding</option>
+       <option value="Renewing Soon" ${d.status==='Renewing Soon'?'selected':''}>Renewing Soon</option>
+       <option value="Paused" ${d.status==='Paused'?'selected':''}>Paused</option>
+       <option value="Completed" ${d.status==='Completed'?'selected':''}>Completed</option>
+      </select>
+     </div>
+    </div>
+    <div class="two" style="margin-top:8px">
+     <div>
+      <label style="font-weight:600;margin:0 0 4px">Start Date</label>
+      <input id="edStartDate" type="date" value="${esc(d.startDate||'')}">
+     </div>
+     <div>
+      <label style="font-weight:600;margin:0 0 4px">End Date / Renewal</label>
+      <input id="edEndDate" type="date" value="${esc(d.endDate||'')}">
+     </div>
+    </div>
+   </div>
+
+   <div>
+    <label style="font-weight:600;margin:0 0 4px">Engagement Notes / Scope</label>
+    <textarea id="edNotes" rows="2" placeholder="e.g. 8 posters, 4 reels monthly, bi-weekly status call" style="font-size:13px">${esc(d.notes||'')}</textarea>
+   </div>
+  </div>
+
+  <div class="bar" style="margin-top:16px">
+   <span class="sp"></span>
+   <button type="button" id="edCancel">Cancel</button>
+   <button class="pri" type="button" id="edSave"><span class="material-symbols-outlined">save</span> Save Details</button>
+  </div>
+ `;
+
+ openModal(html);
+ $("closeDetailsModal").onclick=closeModal;
+ $("edCancel").onclick=closeModal;
+ $("edSave").onclick=async()=>{
+  const updated={
+   contactPerson:$("edContactPerson").value.trim(),
+   email:$("edEmail").value.trim(),
+   phone:$("edPhone").value.trim(),
+   instagram:$("edInstagram").value.trim(),
+   monthlyTarget:parseInt($("edMonthlyTarget").value,10)||12,
+   duration:$("edDuration").value.trim()||"Ongoing",
+   status:$("edStatus").value,
+   startDate:$("edStartDate").value,
+   endDate:$("edEndDate").value,
+   notes:$("edNotes").value.trim()
+  };
+  $("edSave").disabled=true;
+  $("edSave").innerHTML=`<span class="spinner"></span> Saving…`;
+  await saveClientDetails(c,updated);
+  closeModal();
+  renderClientOverview();
+ };
+}
+
 // 0. Client Overview Screen (Default Screen for Client View in Admin)
 function renderClientOverview(){
  const canvas=getClientCanvas(cur);
+ const details=getClientDetails(cur);
+ const cachedCreds=getClientCreds(cur);
+ const cachedPw=cachedCreds?.password||"";
  const nowM=now.getMonth(),nowY=now.getFullYear();
  const thisMonthPrefix=`${nowY}-${pad(nowM+1)}`;
  const monthPosts=posts.filter(p=>p.post_date&&p.post_date.startsWith(thisMonthPrefix));
@@ -1358,7 +1676,7 @@ function renderClientOverview(){
      <div>
       <div style="display:flex;align-items:center;gap:8px">
        <h2 style="margin:0;font-size:22px">${esc(cur.name)}</h2>
-       <span class="tag" style="background:#E8F5E9;color:#1B5E20;font-size:11px;padding:2px 8px">Active Client</span>
+       <span class="tag" style="background:#E8F5E9;color:#1B5E20;font-size:11px;padding:2px 8px">${esc(details.status||'Active Retainer')}</span>
       </div>
       <p class="muted" style="margin:3px 0 0;font-size:13px">
        ${cur.username?`Portal login: <b>@${esc(cur.username)}</b> · `:''}
@@ -1446,6 +1764,160 @@ function renderClientOverview(){
    </div>
   </div>
 
+  <!-- Client Details & Credentials Section -->
+  <div class="panel" id="clientDetailsSection" style="margin-top:16px">
+   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+    <div>
+     <div style="display:flex;align-items:center;gap:8px">
+      <span class="material-symbols-outlined" style="font-size:22px;color:var(--accent)">badge</span>
+      <h3 style="margin:0;font-size:18px">Details & Credentials</h3>
+     </div>
+     <p class="muted" style="margin:3px 0 0;font-size:13px">1-click portal credentials, contact information & contract duration</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+     <button id="copyAllCredsBtn" class="pri" style="font-size:12.5px;padding:6px 14px" title="Copy full credentials to clipboard">
+      <span class="material-symbols-outlined" style="font-size:16px">content_copy</span> Copy Credentials
+     </button>
+     <button id="editDetailsBtn" style="font-size:12.5px;padding:6px 14px" title="Edit contact info and contract duration">
+      <span class="material-symbols-outlined" style="font-size:16px">edit</span> Edit Details
+     </button>
+    </div>
+   </div>
+
+   <div class="details-grid">
+    <!-- Card 1: Portal Login Credentials -->
+    <div class="details-card">
+     <div class="details-card-header">
+      <span class="material-symbols-outlined" style="color:var(--poster);font-size:20px">key</span>
+      <span>Portal Credentials</span>
+      <span class="tag" style="background:#E1ECF6;color:#1565C0;font-size:10.5px;margin-left:auto">Access</span>
+     </div>
+
+     <div class="cred-item">
+      <span class="cred-label">Portal URL</span>
+      <div class="cred-val-row">
+       <a href="https://client.thynkculture.com" target="_blank" rel="noopener" class="cred-val" style="color:var(--accent);text-decoration:none">https://client.thynkculture.com</a>
+       <button type="button" class="cred-mini-btn" id="copyUrlBtn" title="Copy portal link">
+        <span class="material-symbols-outlined" style="font-size:16px">content_copy</span>
+       </button>
+      </div>
+     </div>
+
+     <div class="cred-item">
+      <span class="cred-label">Username</span>
+      <div class="cred-val-row">
+       <span class="cred-val" style="font-weight:700">@${esc(cur.username||cur.slug)}</span>
+       <button type="button" class="cred-mini-btn" id="copyUserBtn" title="Copy username">
+        <span class="material-symbols-outlined" style="font-size:16px">content_copy</span>
+       </button>
+      </div>
+     </div>
+
+     <div class="cred-item">
+      <span class="cred-label">Password</span>
+      <div class="cred-val-row">
+       <span class="cred-val" id="credPwDisplay" style="font-family:monospace;letter-spacing:1px">${cachedPw?'••••••••':'<span class="muted" style="font-family:sans-serif;font-style:italic">Configured in DB</span>'}</span>
+       ${cachedPw?`
+        <button type="button" class="cred-mini-btn" id="togglePwDisplayBtn" title="Show/Hide password">
+         <span class="material-symbols-outlined" style="font-size:16px">visibility</span>
+        </button>
+        <button type="button" class="cred-mini-btn" id="copyPwBtn" title="Copy password">
+         <span class="material-symbols-outlined" style="font-size:16px">content_copy</span>
+        </button>
+       `:""}
+       <button type="button" class="cred-mini-btn" id="resetPwQuickBtn" title="Set or reset password" style="margin-left:auto;font-size:11.5px;padding:3px 7px">
+        <span class="material-symbols-outlined" style="font-size:14px">lock_reset</span> Reset
+       </button>
+      </div>
+     </div>
+    </div>
+
+    <!-- Card 2: Contact Information -->
+    <div class="details-card">
+     <div class="details-card-header">
+      <span class="material-symbols-outlined" style="color:#788C5D;font-size:20px">contacts</span>
+      <span>Contact Information</span>
+     </div>
+
+     <div class="detail-row">
+      <span class="detail-label">Contact Person</span>
+      <span class="detail-value" style="font-weight:600">${esc(details.contactPerson||'Not specified')}</span>
+     </div>
+
+     <div class="detail-row">
+      <span class="detail-label">Email</span>
+      <span class="detail-value">
+       ${details.email?`<a href="mailto:${esc(details.email)}" style="color:var(--ink);text-decoration:underline">${esc(details.email)}</a>`:'<span class="muted">—</span>'}
+      </span>
+     </div>
+
+     <div class="detail-row">
+      <span class="detail-label">Phone / WhatsApp</span>
+      <span class="detail-value">
+       ${details.phone?`
+        <a href="https://wa.me/${esc(details.phone.replace(/[^0-9]/g,''))}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:#2E7D32;font-weight:600;text-decoration:none">
+         <span class="material-symbols-outlined" style="font-size:15px">chat</span> ${esc(details.phone)}
+        </a>
+       `:'<span class="muted">—</span>'}
+      </span>
+     </div>
+
+     <div class="detail-row">
+      <span class="detail-label">Instagram</span>
+      <span class="detail-value">
+       ${details.instagram?`
+        <a href="https://instagram.com/${esc(details.instagram.replace(/^@/,''))}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600;text-decoration:none">
+         @${esc(details.instagram.replace(/^@/,''))}
+        </a>
+       `:'<span class="muted">—</span>'}
+      </span>
+     </div>
+    </div>
+
+    <!-- Card 3: Engagement & Contract Duration -->
+    <div class="details-card">
+     <div class="details-card-header">
+      <span class="material-symbols-outlined" style="color:#6A9BCC;font-size:20px">date_range</span>
+      <span>Engagement & Duration</span>
+     </div>
+
+     <div class="detail-row">
+      <span class="detail-label">Duration</span>
+      <span class="detail-value" style="font-weight:600">${esc(details.duration||'Ongoing Retainer')}</span>
+     </div>
+
+     <div class="detail-row">
+      <span class="detail-label">Timeline</span>
+      <span class="detail-value">
+       ${(details.startDate||details.endDate)?`
+        <b>${esc(details.startDate||'Started')}</b> → <b>${esc(details.endDate||'Ongoing')}</b>
+       `:'<span class="muted">No dates set</span>'}
+      </span>
+     </div>
+
+     <div class="detail-row">
+      <span class="detail-label">Status</span>
+      <span class="detail-value">
+       <span class="tag" style="${getStatusTagStyle(details.status||'Active Retainer')}">${esc(details.status||'Active Retainer')}</span>
+      </span>
+     </div>
+
+     <div class="detail-row">
+      <span class="detail-label">Monthly Target</span>
+      <span class="detail-value">
+       ${details.monthlyTarget?`<b>${details.monthlyTarget}</b> posts/month`:'<span class="muted">Custom</span>'}
+      </span>
+     </div>
+
+     ${details.notes?`
+      <div style="font-size:12px;color:var(--mute);margin-top:4px;border-top:1px dashed var(--line);padding-top:6px;line-height:1.4">
+       ${esc(details.notes)}
+      </div>
+     `:''}
+    </div>
+   </div>
+  </div>
+
   <!-- Upcoming Schedule Queue -->
   <div class="panel" style="margin-top:16px">
    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
@@ -1500,6 +1972,62 @@ function renderClientOverview(){
  $("cardNavFeed").onclick=()=>{adminView="feed";updateSubnavActive();renderFeedView()};
  $("cardNavDocs").onclick=()=>{adminView="docs";updateSubnavActive();renderDocsView()};
  $("cardNavReports").onclick=()=>{adminView="reports";updateSubnavActive();renderReportsView()};
+
+ // Details & Credentials Wiring
+ $("copyAllCredsBtn").onclick=async()=>{
+  const un=cur.username||cur.slug;
+  const pw=cachedPw?cachedPw:"(as configured in database)";
+  const credText=`Thynkculture Client Portal\nURL: https://client.thynkculture.com\nUsername: ${un}\nPassword: ${pw}`;
+  try{
+   await navigator.clipboard.writeText(credText);
+   const btn=$("copyAllCredsBtn");
+   const orig=btn.innerHTML;
+   btn.innerHTML=`<span class="material-symbols-outlined" style="font-size:16px">done</span> Copied!`;
+   setTimeout(()=>{btn.innerHTML=orig},2500);
+  }catch(e){
+   prompt("Copy client credentials below:",credText);
+  }
+ };
+
+ $("copyUrlBtn").onclick=async()=>{
+  try{
+   await navigator.clipboard.writeText("https://client.thynkculture.com");
+   $("copyUrlBtn").innerHTML=`<span class="material-symbols-outlined" style="font-size:16px;color:#2E7D32">done</span>`;
+   setTimeout(()=>{$("copyUrlBtn").innerHTML=`<span class="material-symbols-outlined" style="font-size:16px">content_copy</span>`},2000);
+  }catch(e){}
+ };
+
+ $("copyUserBtn").onclick=async()=>{
+  try{
+   await navigator.clipboard.writeText(cur.username||cur.slug);
+   $("copyUserBtn").innerHTML=`<span class="material-symbols-outlined" style="font-size:16px;color:#2E7D32">done</span>`;
+   setTimeout(()=>{$("copyUserBtn").innerHTML=`<span class="material-symbols-outlined" style="font-size:16px">content_copy</span>`},2000);
+  }catch(e){}
+ };
+
+ if($("copyPwBtn")){
+  $("copyPwBtn").onclick=async()=>{
+   if(cachedPw){
+    try{
+     await navigator.clipboard.writeText(cachedPw);
+     $("copyPwBtn").innerHTML=`<span class="material-symbols-outlined" style="font-size:16px;color:#2E7D32">done</span>`;
+     setTimeout(()=>{$("copyPwBtn").innerHTML=`<span class="material-symbols-outlined" style="font-size:16px">content_copy</span>`},2000);
+    }catch(e){}
+   }
+  };
+ }
+
+ if($("togglePwDisplayBtn")){
+  let pwShown=false;
+  $("togglePwDisplayBtn").onclick=()=>{
+   pwShown=!pwShown;
+   $("credPwDisplay").textContent=pwShown?cachedPw:'••••••••';
+   $("togglePwDisplayBtn").innerHTML=`<span class="material-symbols-outlined" style="font-size:16px">${pwShown?'visibility_off':'visibility'}</span>`;
+  };
+ }
+
+ $("resetPwQuickBtn").onclick=()=>resetPasswordModal(cur);
+ $("editDetailsBtn").onclick=()=>editClientDetailsModal(cur);
 
  $("contentArea").querySelectorAll("[data-cotick]").forEach(btn=>{
   btn.onclick=e=>{
@@ -2537,6 +3065,14 @@ async function commitClientSave(c,name,slug,accent_color,username,password,logo_
  }
 
  if(username&&password&&cur&&cur.id&&cur.id!=="undefined"){
+  try{
+   localStorage.setItem("tc_cred_"+cur.id,JSON.stringify({
+    username:username,
+    password:password,
+    portalUrl:"https://client.thynkculture.com",
+    updatedAt:new Date().toISOString()
+   }));
+  }catch(e){}
   try{
    const {data:rpcData,error:rpcErr}=await sb.rpc("admin_set_client_login",{p_client_id:cur.id,p_username:username,p_password:password});
    if(rpcErr){console.warn("Supabase RPC admin_set_client_login pending:",rpcErr.message)}

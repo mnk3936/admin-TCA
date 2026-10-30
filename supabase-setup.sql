@@ -123,4 +123,7 @@ ALTER TABLE clients ADD COLUMN IF NOT EXISTS canvas JSONB DEFAULT '{}'::jsonb;
 -- 6. Add logo_url column to clients for square logo avatar
 ALTER TABLE clients ADD COLUMN IF NOT EXISTS logo_url TEXT;
 
+-- 7. Add details column to clients for contact details, duration, and engagement notes
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS details JSONB DEFAULT '{}'::jsonb;
+
 
